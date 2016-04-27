@@ -50,9 +50,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FlasherLib\FlasherLib.csproj">
+    <ProjectReference Include="..\FlasherLib\FlashLib.csproj">
       <Project>{ceb53b6d-4f94-4348-a8de-e913f4b1960f}</Project>
-      <Name>FlasherLib</Name>
+      <Name>FlashLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STM32CANFlasher", "STM32CANFlasher\STM32CANFlasher.csproj", "{4E4A97F0-74FF-48E9-AB6A-1AE717E76F79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlasherLib", "FlasherLib\FlasherLib.csproj", "{CEB53B6D-4F94-4348-A8DE-E913F4B1960F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlashLib", "FlasherLib\FlashLib.csproj", "{CEB53B6D-4F94-4348-A8DE-E913F4B1960F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

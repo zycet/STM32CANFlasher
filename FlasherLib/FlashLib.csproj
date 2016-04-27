@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BUAA</RootNamespace>
-    <AssemblyName>FlasherLib</AssemblyName>
+    <AssemblyName>FlashLib</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressDataGroup.cs" />
+    <Compile Include="FlashJob.cs" />
     <Compile Include="IntelHexParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
