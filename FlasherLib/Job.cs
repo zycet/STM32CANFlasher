@@ -23,8 +23,8 @@ namespace BUAA
 
         public int Address;
 
-        public int DataNum;
+        public byte[] DataSend;
 
-        public byte[] Data;
+        public byte[] DataReceive;
     }
 }
