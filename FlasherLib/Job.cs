@@ -7,6 +7,13 @@ namespace BUAA
 {
     public class Job
     {
+        public enum JobState
+        {
+            Idle, Running, Done, Fail
+        }
+
+        public JobState State;
+
         public enum JobType
         {
             Read, Write, Erase, Ping, GetState, GetID, Go
