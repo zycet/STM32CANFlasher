@@ -1,4 +1,5 @@
-﻿using BUAA.Structure;
+﻿using BUAA.Misc;
+using BUAA.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

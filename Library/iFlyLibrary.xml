@@ -1,0 +1,2566 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>iFlyLibrary</name>
+    </assembly>
+    <members>
+        <member name="T:BUAA.BasicMath.LinearFitting2">
+            <summary>
+            2次函数分段拟合类
+            </summary>
+        </member>
+        <member name="M:BUAA.BasicMath.LinearFitting2.#ctor(System.Int32)">
+            <summary>
+            根据指定分段数建立二次分段拟合对象
+            </summary>
+            <param name="SectionNum">分段数</param>
+        </member>
+        <member name="P:BUAA.BasicMath.LinearFitting2.Item(System.Int32,System.Int32)">
+            <summary>
+            获取或设置系数
+            </summary>
+            <param name="SectionIndex">分段序号</param>
+            <param name="OrderIndex">系数序号（0-2，0为二次项，1为1次项，2为0次项）</param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.BasicMath.LinearFitting2.SetKs(System.Int32,System.Double[])">
+            <summary>
+            设置系数组
+            </summary>
+            <param name="SectionIndex">分段序号</param>
+            <param name="Ks">系数组（长度为3，0为二次项，1为1次项，2为0次项）</param>
+        </member>
+        <member name="M:BUAA.BasicMath.LinearFitting2.GetKs(System.Int32)">
+            <summary>
+            获取系数组
+            </summary>
+            <param name="SectionIndex">分段序号</param>
+            <returns>系数组（长度为3，0为二次项，1为1次项，2为0次项）</returns>
+        </member>
+        <member name="M:BUAA.BasicMath.LinearFitting2.SolveY(System.Double)">
+            <summary>
+            求指定X对应的Y
+            </summary>
+            <param name="X">X（0~1）</param>
+            <returns>对应的Y</returns>
+        </member>
+        <member name="M:BUAA.BasicMath.LinearFitting2.SolveYWithScale(System.Double,System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            求指定X(进行线性缩放后)对应的Y（也进行指定线性缩放）
+            </summary>
+            <param name="X">X</param>
+            <param name="X1">X的定义区间起始点</param>
+            <param name="X2">X的定义区间终止点</param>
+            <param name="Y1">Y的定义区间起始点</param>
+            <param name="Y2">Y的定义区间终止点</param>
+            <returns>对应的Y</returns>
+        </member>
+        <member name="M:BUAA.BasicMath.LinearFitting2.CalcAndSetKs(System.Double[])">
+            <summary>
+            计算并存储指定一组点对应的各参数组
+            </summary>
+            <param name="Ys">一线性分布组点的Y值，数量必须为SectionNum+1个。</param>
+        </member>
+        <member name="T:BUAA.BasicMath.SimpleGui">
+            <summary>
+            基本制导计算
+            </summary>
+        </member>
+        <member name="F:BUAA.BasicMath.SimpleGui.ANG2RAD">
+            <summary>
+            角度转换为弧度
+            </summary>
+        </member>
+        <member name="F:BUAA.BasicMath.SimpleGui.RAD2ANG">
+            <summary>
+            弧度转换为角度
+            </summary>
+        </member>
+        <member name="F:BUAA.BasicMath.SimpleGui.EarthR">
+            <summary>
+            地球半径
+            </summary>
+        </member>
+        <member name="M:BUAA.BasicMath.SimpleGui.TwoPointsHorDistance(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            计算两点水平距离
+            </summary>
+            <param name="cLon">起始点经度</param>
+            <param name="cLat">起始点纬度</param>
+            <param name="aLon">终止点经度</param>
+            <param name="aLat">终止点纬度</param>
+            <returns>距离(米)</returns>
+            <remarks>
+             假设地球是一个标准球体，半径为R,并且假设东经为正，西经为负，北纬为正，南纬为负，
+             则 A(x,y)的坐标可表示为（R*cosy*cosx,R*cosy*sinx,R*siny）
+             B(a,b)可表示为(R*cosb*cosa,R*cosb*sina,R*sinb)
+             于是，AB对于球心所张的角的余弦大小为
+             cosb*cosy*(cosa*cosx+sina*sinx)+sinb*siny=cosb*cosy*Math.Cos(a-x)+sinb*siny
+             因此AB两点的球面距离为
+             R*{arccos[cosb*cosy*Math.Cos(a-x)+sinb*siny]}
+             Math.Cos(a-x) = Ca_c
+             cosb = Calat
+             sinb = Salat
+             cosy = Cclat
+             siny = Sclat
+            </remarks>
+        </member>
+        <member name="M:BUAA.BasicMath.SimpleGui.TwoPointsCourseAngle(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            计算航线与正北的夹角
+            </summary>
+            <param name="cLon">起始点经度</param>
+            <param name="cLat">起始点纬度</param>
+            <param name="aLon">终止点经度</param>
+            <param name="aLat">终止点纬度</param>
+            <returns>顺时针(度)</returns>
+        </member>
+        <member name="M:BUAA.BasicMath.SimpleGui.LineErrorCalc(System.Single,System.Single,System.Single)">
+            <summary>
+            计算当前点垂直航线方向到航线的距离
+            </summary>
+            <param name="TargetYaw">当前点到目标航点的航向角</param>
+            <param name="LineYaw">当前航段的航向角</param>
+            <param name="dXY">dXY为当前点到目标点的距离</param>
+            <returns>在航线左侧为正(米)</returns>
+        </member>
+        <member name="M:BUAA.BasicMath.SimpleGui.LineDistanceCalc(System.Single,System.Single,System.Single)">
+            <summary>
+            计算当前点沿航线方向到目标点的距离
+            </summary>
+            <param name="TargetYaw">当前点到目标航点的航向角</param>
+            <param name="LineYaw">当前航段的航向角</param>
+            <param name="dXY">dXY为当前点到目标点的距离</param>
+            <returns></returns>
+        </member>
+        <member name="T:BUAA.BasicMath.SimpleMatrix">
+            <summary>
+            M=横向元素个数
+            N=纵向元素个数
+            0,1为第一行第二列元素
+            N-1,M-1为最后一个元素
+            </summary>
+        </member>
+        <member name="M:BUAA.BasicMath.SimpleMatrix.VecSolveEq(System.Double,System.Double[])">
+            <summary>
+            计算一元多次函数值
+            </summary>
+            <param name="X">X</param>
+            <param name="Vec">各次系数（从高次数开始）</param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.BasicMath.SimpleMatrix.VecSolveEqD(System.Double,System.Double[])">
+            <summary>
+            计算一元多次方程导数值
+            </summary>
+            <param name="X">X</param>
+            <param name="Vec">方程各次系数（从高次数开始）</param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.Communication.TcpLink.Connect(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="ConnectString">
+            存在以下2种形式
+            @RemoteIP@RemotePort 以任意的本机端口用客户端模式连接对应的远程地址及远程端口
+            LocalPort@@ 以指定的本机端口用服务器模式监听 直至有客户端连接上
+            </param>
+        </member>
+        <member name="P:BUAA.Communication.UartLink.BufferByteNum">
+            <summary>
+            缓存中储存的数据个数
+            </summary>
+        </member>
+        <member name="M:BUAA.Communication.UartLink.Connect(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="ConnectString">
+            存在以下1种形式
+            COMx@BPS
+            </param>
+        </member>
+        <member name="M:BUAA.Communication.UartLink.WriteBytes(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            写入数据
+            </summary>
+            <param name="Bytes">待写入的数据数组</param>
+            <param name="Start">起始位置</param>
+            <param name="Count">数据个数</param>
+        </member>
+        <member name="M:BUAA.Communication.UartLink.ReadBytes(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            读取指定数量的字节数据
+            </summary>
+            <param name="Bytes">数据储存的数组</param>
+            <param name="Start">起始位置</param>
+            <param name="Count">数据个数</param>
+        </member>
+        <member name="M:BUAA.Communication.UdpLink.Connect(System.String)">
+            <summary>
+            连接指定地址
+            </summary>
+            <param name="ConnectString">
+            存在以下2种形式
+            LocolPort@RemoteIP@RemotePort 表示使用LocolPort端口监听并连接RemoteIP地址下的RemotePort端口
+            @RemoteIP@RemotePort 表示可使用任意端口监听并连接RemoteIP地址下的RemotePort端口
+            </param>
+        </member>
+        <member name="T:BUAA.Communication.ILink">
+            <summary>
+            通讯连接通用接口
+            </summary>
+        </member>
+        <member name="M:BUAA.Communication.ILink.Connect(System.String)">
+            <summary>
+            连接
+            </summary>
+            <param name="ConnectString">连接字符串</param>
+        </member>
+        <member name="M:BUAA.Communication.ILink.Disconnect">
+            <summary>
+            断开连接
+            </summary>
+        </member>
+        <member name="E:BUAA.Communication.ILink.OnReceive">
+            <summary>
+            接收到数据事件
+            </summary>
+        </member>
+        <member name="E:BUAA.Communication.ILink.OnError">
+            <summary>
+            发生错误事件
+            </summary>
+        </member>
+        <member name="P:BUAA.Communication.ILink.IsConnect">
+            <summary>
+            是否连接状态
+            </summary>
+        </member>
+        <member name="P:BUAA.Communication.ILink.Enable">
+            <summary>
+            接收使能
+            </summary>
+        </member>
+        <member name="M:BUAA.Communication.ILink.Send(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            发送数据
+            </summary>
+            <param name="Buffer">数据缓冲区</param>
+            <param name="Offset">偏移量</param>
+            <param name="Length">长度</param>
+            <returns>发送的长度</returns>
+        </member>
+        <member name="M:BUAA.Communication.ILink.Send(System.Byte[],System.Int32)">
+            <summary>
+            发送数据
+            </summary>
+            <param name="Buffer">数据缓冲区</param>
+            <param name="Offset">偏移量</param>
+            <returns>发送的长度</returns>
+        </member>
+        <member name="M:BUAA.Communication.ILink.Send(System.Byte[])">
+            <summary>
+            发送数据
+            </summary>
+            <param name="Buffer">数据缓冲区</param>
+            <returns>发送的长度</returns>
+        </member>
+        <member name="M:BUAA.Device.ICamera.Open(BUAA.Device.CameraID,System.Int32,System.Int32,BUAA.Device.CameraRawFormat,System.Int32)">
+            <summary>
+            打开设备
+            </summary>
+            <param name="NameID">设备标识</param>
+            <param name="Width">图像宽度</param>
+            <param name="Height">图像高度</param>
+            <param name="Format">图像格式</param>
+            <param name="BufferNum">需要内部初始化的缓冲区数</param>
+        </member>
+        <member name="M:BUAA.Device.ICamera.Open(System.Int32,System.Int32,System.Int32,BUAA.Device.CameraRawFormat,System.Int32)">
+            <summary>
+            打开设备
+            </summary>
+            <param name="No">设备序号</param>
+            <param name="Width">图像宽度</param>
+            <param name="Height">图像高度</param>
+            <param name="Format">图像格式</param>
+            <param name="BufferNum">需要内部初始化的缓冲区数</param>
+        </member>
+        <member name="M:BUAA.Device.ICamera.Close">
+            <summary>
+            关闭设备
+            </summary>
+        </member>
+        <member name="P:BUAA.Device.ICamera.Width">
+            <summary>
+            图像宽度
+            </summary>
+        </member>
+        <member name="P:BUAA.Device.ICamera.Height">
+            <summary>
+            图像高度
+            </summary>
+        </member>
+        <member name="P:BUAA.Device.ICamera.Para">
+            <summary>
+            采集参数
+            </summary>
+        </member>
+        <member name="P:BUAA.Device.ICamera.IsStarted">
+            <summary>
+            是否已启动采集
+            </summary>
+        </member>
+        <member name="M:BUAA.Device.ICamera.FetchFrame(System.Byte[],BUAA.Device.CameraExInfo)">
+            <summary>
+            同步获取一帧
+            </summary>
+            <param name="Raw"></param>
+            <param name="ExInfo"></param>
+            <returns></returns>
+        </member>
+        <member name="E:BUAA.Device.ICamera.OnReceiveFrame">
+            <summary>
+            当收到异步帧时发生
+            </summary>
+        </member>
+        <member name="M:BUAA.Device.ICamera.Start">
+            <summary>
+            异步采集启动
+            </summary>
+        </member>
+        <member name="M:BUAA.Device.ICamera.Stop">
+            <summary>
+            异步采集停止
+            </summary>
+        </member>
+        <member name="M:BUAA.Device.ICamera.PushBufferBack(System.Byte[])">
+            <summary>
+            将缓冲放回列队
+            </summary>
+            <param name="Raw"></param>
+        </member>
+        <member name="T:BUAA.Encode.XXTEA">
+            <summary>
+            XXTEA
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.Math2D.Shift(BUAA.GIS.Math2D.SectionLine,System.Double,System.Int32)">
+            <summary>
+            求与直线段平行的直线
+            </summary>
+            <param name="l"></param>
+            <param name="dis"></param>
+            <param name="dir"></param>平移方向，上加1下减-1，右加1左减-1
+            <returns></returns>返回与输入线段平行的直线
+        </member>
+        <member name="M:BUAA.GIS.Math2D.CalcCrossPoint(BUAA.GIS.Math2D.SectionLine,BUAA.GIS.Math2D.Line)">
+            <summary>
+            计算直线与直线段的交点
+            </summary>
+            <param name="sl"></param>
+            <param name="l"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.GIS.Math2D.PreProcess(BUAA.GIS.ScanPointProcess.Point3D[])">
+            <summary>
+            读入输入点并进行坐标转换，返回以第一个航点为相对原点的航点序列
+            </summary>
+            <param name="Points"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.GIS.Math2D.SelectStartPoint(BUAA.GIS.Math2D.Point,BUAA.GIS.Math2D.Point)">
+            <summary>
+            选择一条线段的起点，返回零去p1为起点
+            </summary>
+            <param name="p1"></param>
+            <param name="p2"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.GIS.Math2D.GenSectionLine(BUAA.GIS.Math2D.Point[])">
+            <summary>
+            生成线段集合
+            </summary>
+            <param name="Points"></param>经过坐标变换后的航点
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.GIS.Math2D.ScanDir(BUAA.GIS.Math2D.Point[],System.Collections.Generic.List{BUAA.GIS.Math2D.SectionLine})">
+            <summary>
+            判断多边形是否满足生成扫描航线的条件，若满足返回扫描方向
+            </summary>
+            <param name="Points"></param>
+            <param name="SLine"></param>
+            <returns></returns>
+        </member>
+        <member name="T:BUAA.GIS.ScanPointProcess.Point3D">
+            <summary>
+            X:横轴东或经度
+            Y:纵轴北或纬度
+            Z:垂直轴或海拔
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.ScanPointProcess.PointDistance">
+            <summary>
+            X:横轴东或经度
+            Y:纵轴北或纬度
+            Z:垂直轴或海拔
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GIS3DExample.GDM">
+            <summary>
+            保存的传入的数据对象，用于数据交互。
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GIS3DExample.#ctor(BUAA.GIS.GISDataMananger)">
+            <summary>
+            初始化接口类，实现此类的扩展类需执行此构造函数。
+            </summary>
+            <param name="GDM">地理数据对象</param>
+        </member>
+        <member name="T:BUAA.GIS.DataTypeEnum">
+            <summary>
+            地理数据类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.UASModule">
+            <summary>
+            UASModule信息发生改变
+            MainIndex有效
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.Airline">
+            <summary>
+            Airline信息发生改变
+            MainIndex,ExIndex有效
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.SpecPoint">
+            <summary>
+            SpecPoint信息发生改变
+            MainIndex有效
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.MiscPoint">
+            <summary>
+            MiscPoint信息发生改变
+            MainIndex有效
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.Module3D">
+            <summary>
+            Module3D信息发生改变
+            MainIndex有效
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.Picture3Ds">
+            <summary>
+            Picture3Ds信息发生改变
+            MainIndex有效
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.DataTypeEnum.SelectState">
+            <summary>
+            选中状态发生改
+            MainIndex,ExIndex均无效
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.DataChanged">
+            <summary>
+            数据改变时响应函数定义
+            </summary>
+            <param name="Sender">发送者对象</param>
+            <param name="DataType">发生改变的数据类型</param>
+            <param name="MainIndex">主索引（序号或航线号），从0开始如果为-1，则代表所有。</param>
+            <param name="ExIndex">副索引（可为航点号或无用），从0开始如果为-1，则代表所有。</param>
+            <param name="Para">附加参数对象</param>
+        </member>
+        <member name="T:BUAA.GIS.GISDataMananger">
+            <summary>
+            地理对象数据储存管理类
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GISDataMananger.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            初始化地理对象数据储存管理对象
+            </summary>
+            <param name="UASModulesNum">最多支持UAV数量</param>
+            <param name="AirlinesNum">最多支持Airline数量</param>
+            <param name="SpecPointsNum">最多支持的SpecPoint数量</param>
+        </member>
+        <member name="M:BUAA.GIS.GISDataMananger.#ctor">
+            <summary>
+            用于符合串行化要求
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.UASModules">
+            <summary>
+            无人机模型对象数组
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.Airlines">
+            <summary>
+            航线对象数组
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.SpecPoints">
+            <summary>
+            特殊点对象数组
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.MiscPoints">
+            <summary>
+            其他点对象数组
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.Module3Ds">
+            <summary>
+            附加模型对象数组
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.Picture3Ds">
+            <summary>
+            附加图像对象数组
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.SelectedAirlineNo">
+            <summary>
+            当前选中的航线(-1表示未选中任何)
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.SelectedWaypointNo">
+            <summary>
+            当前选中的航点(-1表示未选中任何)
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataMananger.SelectedSpecPoint">
+            <summary>
+            当前选中的特殊点(-1表示未选中任何)
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GISDataExchangeInterface">
+            <summary>
+            用于GIS中对象数据交互的接口
+            所有实现此接口的类应实现ProcessDataChanged函数用于接受数据变动(此函数会长数据发生改变时被调用，除数据被自身改变时)
+            当由于用户操作等原因修改了内部数据时应该修改GDM中的数据并引发相应OnDataChanged系列事件。    
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISDataExchangeInterface.OnDataChanged">
+            <summary>
+            继承此接口的类需在其内部数据改变时触发此事件
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GISDataExchangeInterface.ProcessDataChanged(System.Object,BUAA.GIS.DataTypeEnum,System.Int32,System.Int32,System.Object)">
+            <summary>
+            继承此接口的类需实现此函数用于更新内部数据与显示
+            </summary>
+            <param name="Sender">发送者对象</param>
+            <param name="DataType">发生改变的数据类型</param>
+            <param name="MainIndex">主索引（序号或航线号），从0开始如果为-1，则代表所有。</param>
+            <param name="ExIndex">副索引（可为航点号或无用），从0开始如果为-1，则代表所有。</param>
+            <param name="Para">附加参数对象</param>
+        </member>
+        <member name="T:BUAA.GIS.GISDataExchangeHelper">
+            <summary>
+            用于完成多个GISDataExchangeInterface对象间及与GISDataMananger的数据交互
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISDataExchangeHelper.GISDEIs">
+            <summary>
+            系统中注册的需要交互数据的对象集合
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GISDataExchangeHelper.#ctor(BUAA.GIS.GISDataMananger)">
+            <summary>
+            初始化地理数据交互辅助对象并传入地理数据管理对象
+            </summary>
+            <param name="GDM"></param>
+        </member>
+        <member name="M:BUAA.GIS.GISDataExchangeHelper.RegisterGISDEI(BUAA.GIS.GISDataExchangeInterface)">
+            <summary>
+            注册需交互数据的对象
+            </summary>
+            <param name="GISDEI"></param>
+        </member>
+        <member name="M:BUAA.GIS.GISDataExchangeHelper.TriggerDataChanged(System.Object,BUAA.GIS.DataTypeEnum,System.Int32,System.Int32,System.Object)">
+            <summary>
+            手动触发数据更新
+            </summary>
+            <param name="Sender">发送者对象</param>
+            <param name="DataType">发生改变的数据类型</param>
+            <param name="MainIndex">主索引（序号或航线号），从0开始如果为-1，则代表所有。</param>
+            <param name="ExIndex">副索引（可为航点号或无用），从0开始如果为-1，则代表所有。</param>
+            <param name="Para">附加参数对象</param>
+        </member>
+        <member name="T:BUAA.GIS.GISViewInterface">
+            <summary>
+            地理系统显示接口(各种不同类型地理系统通用显示接口)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISViewInterface.IsAutoReflush">
+            <summary>
+            是否自动在修改数据时刷新显示
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GISViewInterface.ReflushForce">
+            <summary>
+            强制刷新显示
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISViewInterface.ReflushRate">
+            <summary>
+            获取或设置刷新率
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISViewInterface.GISViewLocked">
+            <summary>
+            是否锁定用户视角
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GISViewInterface.GetGCSPoint(System.Drawing.PointF)">
+            <summary>
+            屏幕坐标到地理坐标转换
+            </summary>
+            <param name="ScreenPoint">屏幕坐标</param>
+            <returns>对应地理坐标</returns>
+        </member>
+        <member name="M:BUAA.GIS.GISViewInterface.GetScreenPoint(BUAA.GIS.GCSPoint)">
+            <summary>
+            地理坐标到屏幕坐标转换
+            </summary>
+            <param name="GCSPoint">地理坐标</param>
+            <returns>对应屏幕坐标</returns>
+        </member>
+        <member name="T:BUAA.GIS.GIS2DViewInterface">
+            <summary>
+            2D地理系统显示接口
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.ZoomLevel">
+            <summary>
+            缩放级别(面向2DGIS)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.ZoomLevelMax">
+            <summary>
+            最大缩放级别(面向2DGIS)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.ZoomLevelMin">
+            <summary>
+            最小缩放级别(面向2DGIS)
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GIS2DViewInterface.GetTileID(BUAA.GIS.GCSPoint,System.Int32)">
+            <summary>
+            获取地里位置对应的瓦片ID
+            </summary>
+            <param name="GCSPoint">地理坐标</param>
+            <param name="ZoomLevel">缩放级别</param>
+            <returns>瓦片ID</returns>
+        </member>
+        <member name="M:BUAA.GIS.GIS2DViewInterface.GetGCSRegion(System.Int32,System.Int32)">
+            <summary>
+            瓦片对应的地理区域
+            </summary>
+            <param name="TileID">瓦片ID</param>
+            <param name="ZoomLevel">缩放等级</param>
+            <returns>地理区域</returns>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.MeterPerPixelHorizontal">
+            <summary>
+            水平方向每像素对应的米
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.MeterPerPixelVertical">
+            <summary>
+            垂直方向每像素对应的米
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.DegreePerPixelHorizontal">
+            <summary>
+            水平方向每像素对应的度数
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS2DViewInterface.DegreePerPixelVertical">
+            <summary>
+            垂直方向每像素对应的度数
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GIS3DViewInterface">
+            <summary>
+            3D地理系统显示接口
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GIS3DViewInterface.GIS3DVeiw">
+            <summary>
+            控制视角
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GISTypeEnum">
+            <summary>
+            GIS类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISTypeEnum.Image2D">
+            <summary>
+            2D单张图类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISTypeEnum.Title2D">
+            <summary>
+            2D瓦片图类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISTypeEnum.Global3D">
+            <summary>
+            3D全球空间类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISTypeEnum.Local3D">
+            <summary>
+            3D本地空间类型
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GISInterface">
+            <summary>
+            地理信息系统主对象统一父类
+            任何相兼容系统均需提供实现此类的对象用于数据交互
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISInterface.GISType">
+            <summary>
+            获取当前GIS系统类型
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISInterface.GISName">
+            <summary>
+            获取当前GIS系统名称
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISInterface.DataSourceString">
+            <summary>
+            获取当前数据源地址
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISInterface.IsReady">
+            <summary>
+            表示当前系统是否完成初始化
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnWaypointClick">
+            <summary>
+            航点被点击时触发(含左右键)
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnWaypointDoubleClick">
+            <summary>
+            航点被双击时触发
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnSpecpointClick">
+            <summary>
+            特殊点被点击时触发(含左右键)
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnSpecpointDoubleClick">
+            <summary>
+            特殊点被双击时触发
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnPointClick">
+            <summary>
+            鼠标点击地理点时被触发
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnMiscpointClick">
+            <summary>
+            其他点被点击时触发(含左右键)
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnMiscpointDoubleClick">
+            <summary>
+            其他点被双击时触发
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnMouseClick">
+            <summary>
+            鼠标点击时被触发(含左右键)
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnMouseDoubleClick">
+            <summary>
+            鼠标双击时被触发
+            </summary>
+        </member>
+        <member name="E:BUAA.GIS.GISInterface.OnMouseMove">
+            <summary>
+            鼠标移动时被触发
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.GISInterface.GDM">
+            <summary>
+            用于设置数据交换对象
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GCSPoint">
+            <summary>
+            地理坐标系统点数据结构体
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GCSDistance">
+            <summary>
+            地理坐标系统距离数据结构体
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.EulerAngle">
+            <summary>
+            欧拉角数据结构体
+            旋转顺序：航向、俯仰、滚转
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.GISRegion">
+            <summary>
+            地理区域数据结构体
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISRegion.CenterPoint">
+            <summary>
+            区域中心点坐标
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISRegion.HorizontalRange">
+            <summary>
+            区域中心点水平范围(单位米)
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.GISRegion.VerticalRange">
+            <summary>
+            区域中心点垂直范围(单位米)
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.GISRegion.#ctor(BUAA.GIS.GCSPoint,System.Double,System.Double)">
+            <summary>
+            建立地理区域对象
+            </summary>
+            <param name="CenterPoint">中心点坐标</param>
+            <param name="HorizontalRange">水平范围</param>
+            <param name="VerticalRange">垂直范围</param>
+        </member>
+        <member name="T:BUAA.GIS.AltitudeTypeEnum">
+            <summary>
+            海拔类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.AltitudeTypeEnum.SeaLevel">
+            <summary>
+            相对海平面高度
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.AltitudeTypeEnum.GroundLevel">
+            <summary>
+            相对当前地面高度
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.AltitudeTypeEnum.GeocentricLevel">
+            <summary>
+            相对地心高度
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.PictureProjectTypeEnum">
+            <summary>
+            图像投影类型
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.ViewAngle">
+            <summary>
+            图像投影角度
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ViewAngle.WidthAngle">
+            <summary>
+            水平视角
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ViewAngle.HeightAngle">
+            <summary>
+            垂直视角
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.ProjectOpt">
+            <summary>
+            图像投影参数结构体
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ProjectOpt.AltitudeType">
+            <summary>
+            海拔类型
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ProjectOpt.PictureProjectType">
+            <summary>
+            图像投影方式
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ProjectOpt.ViewPoint">
+            <summary>
+            视点
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ProjectOpt.ViewAngle">
+            <summary>
+            视角
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.ProjectOpt.ViewScreen">
+            <summary>
+            图像投影角度
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Module3D">
+            <summary>
+            3D模型对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Module3D.Pos">
+            <summary>
+            位置
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Module3D.Angle">
+            <summary>
+            角度
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Module3D.IsVisible">
+            <summary>
+            是否显示
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Module3D.ModuleURI">
+            <summary>
+            模型地址
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Picture3D">
+            <summary>
+            3D图像对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Picture3D.IsVisible">
+            <summary>
+            是否显示
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Picture3D.PictureURI">
+            <summary>
+            图像地址
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Picture3D.ProjectOpt">
+            <summary>
+            投影参数
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Path">
+            <summary>
+            路径储存对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Path.MinDistance">
+            <summary>
+            最小间隔距离
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Path.IsVisible">
+            <summary>
+            是否显示
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.Path.#ctor(System.Int32,System.Double)">
+            <summary>
+            初始化路径储存对象
+            </summary>
+            <param name="Length">路径点最大数量</param>
+            <param name="MinDistance">最近两点间隔</param>
+        </member>
+        <member name="M:BUAA.GIS.Path.#ctor">
+            <summary>
+            为满足串行化要求
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Path.Length">
+            <summary>
+            路径最大点数量
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Path.Count">
+            <summary>
+            路径点数量
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.Path.AddPoint(BUAA.GIS.GCSPoint)">
+            <summary>
+            添加路径点
+            </summary>
+            <param name="Point">待添加点</param>
+            <returns>是否添加</returns>
+        </member>
+        <member name="P:BUAA.GIS.Path.Item(System.Int32)">
+            <summary>
+            获得指定位置路径点
+            </summary>
+            <param name="index"></param>
+            <returns></returns>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint">
+            <summary>
+            航点数据对象
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint.SwitchModeEnum">
+            <summary>
+            航点切换模式定义
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.SwitchModeEnum.Before">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint.TurnModeEnum">
+            <summary>
+            航向模式定义
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint.ClimbModeEnum">
+            <summary>
+            爬升模式定义
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint.HoverModeEnum">
+            <summary>
+            盘旋模式定义
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint.CmdModeEnum">
+            <summary>
+            指令模式定义
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.Waypoint.ActionEnum">
+            <summary>
+            任务动作定义
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.ActionEnum.None">
+            <summary>
+            无动作
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.ActionEnum.CameraStart">
+            <summary>
+            相机启动
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.ActionEnum.CameraStop">
+            <summary>
+            相机停止
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.ActionEnum.CameraOnce">
+            <summary>
+            相机单次
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Pos">
+            <summary>
+            位置
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Yaw">
+            <summary>
+            航向
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Speed">
+            <summary>
+            速度
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Radius">
+            <summary>
+            半径
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Delay">
+            <summary>
+            延迟
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.SwitchMode">
+            <summary>
+            切换模式
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.TurnMode">
+            <summary>
+            转弯模式
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.ClimbMode">
+            <summary>
+            高度模式
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.HoverMode">
+            <summary>
+            盘旋模式
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.CmdMode">
+            <summary>
+            指令模式
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Action">
+            <summary>
+            动作
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Waypoint.SwitchModeE">
+            <summary>
+            切换模式(枚举型)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Waypoint.TurnModeE">
+            <summary>
+            转弯模式(枚举型)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Waypoint.ClimbModeE">
+            <summary>
+            爬升模式(枚举型)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Waypoint.HoverModeE">
+            <summary>
+            盘旋模式(枚举型)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Waypoint.CmdModeE">
+            <summary>
+            指令模式(枚举型)
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Waypoint.ActionE">
+            <summary>
+            动作(枚举型)
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Waypoint.Tag">
+            <summary>
+            附加标记对象
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.TextState">
+            <summary>
+            状态文字结构体
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.TextState.IsVisible">
+            <summary>
+            是否显示
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.TextState.Text">
+            <summary>
+            文字
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.TextState.TextColor">
+            <summary>
+            文字颜色
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.TextState.#ctor(System.String)">
+            <summary>
+            初始化状态文字
+            </summary>
+            <param name="Text">如果为""则IsVisible=false</param>
+        </member>
+        <member name="T:BUAA.GIS.UASModule">
+            <summary>
+            UAS模型数据对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.UASModule.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.UASModule.Module">
+            <summary>
+            3D模型对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.UASModule.Path">
+            <summary>
+            路径
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.UASModule.TextState">
+            <summary>
+            四周状态文字
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.UASModule.#ctor(System.String,System.Int32,System.Double)">
+            <summary>
+            初始化模型
+            </summary>
+            <param name="Name">名称</param>
+            <param name="PathLength">路径点最大数量</param>
+            <param name="PathMinDistance">路径点最小距离</param>
+        </member>
+        <member name="M:BUAA.GIS.UASModule.#ctor">
+            <summary>
+            为满足串行化要求
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.UASModule.UpdatePosAngle(BUAA.GIS.GCSPoint,BUAA.GIS.EulerAngle)">
+            <summary>
+            更新位置、姿态
+            </summary>
+            <param name="Pos">位置</param>
+            <param name="Angle">姿态</param>
+            <returns>是否添加至路径</returns>
+        </member>
+        <member name="T:BUAA.GIS.Airline">
+            <summary>
+            航线数据对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Airline.IsVisible">
+            <summary>
+            是否显示
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Airline.IsLock">
+            <summary>
+            是否锁定(不允许编辑)
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Airline.IsLoop">
+            <summary>
+            是否循环
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.Airline.Waypoints">
+            <summary>
+            航点数组
+            </summary>
+        </member>
+        <member name="P:BUAA.GIS.Airline.WaypointNum">
+            <summary>
+            航点数量
+            </summary>
+        </member>
+        <member name="T:BUAA.GIS.MiscPoint">
+            <summary>
+            其他点数据对象
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.ID">
+            <summary>
+            ID
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.IsVisible">
+            <summary>
+            是否显示
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.IsSelected">
+            <summary>
+            是否选中
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.IsLock">
+            <summary>
+            是否锁定(不允许编辑)
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.Pos">
+            <summary>
+            位置
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.Angle">
+            <summary>
+            角度
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.Radius">
+            <summary>
+            半径
+            </summary>
+        </member>
+        <member name="F:BUAA.GIS.MiscPoint.TextState">
+            <summary>
+            四周状态文字
+            </summary>
+        </member>
+        <member name="M:BUAA.GIS.MiscPoint.#ctor(System.Int32,System.String)">
+            <summary>
+            初始化其他点对象
+            </summary>
+            <param name="ID">ID</param>
+            <param name="Name">名称</param>
+        </member>
+        <member name="M:BUAA.GIS.MiscPoint.#ctor">
+            <summary>
+            为符合串行化要求
+            </summary>
+        </member>
+        <member name="T:BUAA.GUI.IntervalCalc">
+            <summary>
+            用于计算仪表控件刻度间隔
+            </summary>
+        </member>
+        <member name="T:BUAA.GUI.IntervalCalc.Pair">
+            <summary>
+            刻度数据对
+            </summary>
+        </member>
+        <member name="F:BUAA.GUI.IntervalCalc.DataInterval">
+            <summary>
+            数据间隔
+            </summary>
+        </member>
+        <member name="F:BUAA.GUI.IntervalCalc.PixelInterval">
+            <summary>
+            像素间隔
+            </summary>
+        </member>
+        <member name="F:BUAA.GUI.IntervalCalc.PixelRank">
+            <summary>
+            像素范围
+            </summary>
+        </member>
+        <member name="M:BUAA.GUI.IntervalCalc.#ctor(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            初始化间隔计算对象
+            </summary>
+            <param name="DataInterval">数据间隔(每个刻度代表的数据差)</param>
+            <param name="PixelInterval">像素间隔(每个刻度间隔的像素)</param>
+            <param name="PixelRank">像素范围(一共需要计算的像素范围)</param>
+        </member>
+        <member name="M:BUAA.GUI.IntervalCalc.CalcStart(System.Single)">
+            <summary>
+            计算开始位置刻度对
+            </summary>
+            <param name="Data">中间位置的数据值</param>
+            <returns>开始位置的数据对</returns>
+        </member>
+        <member name="M:BUAA.GUI.IntervalCalc.CalcPairs(System.Single)">
+            <summary>
+            计算全部数据刻度对
+            </summary>
+            <param name="Data">中间位置的数据值</param>
+            <returns>全部数据刻度对</returns>
+        </member>
+        <member name="M:BUAA.Hibernate.SerializableDictionary`2.ReadXml(System.Xml.XmlReader)">
+            <summary>
+            反序列化
+            </summary>
+            <param name="reader"></param>
+        </member>
+        <member name="M:BUAA.Hibernate.SerializableDictionary`2.WriteXml(System.Xml.XmlWriter)">
+            <summary>
+            序列化
+            </summary>
+            <param name="writer"></param>
+        </member>
+        <member name="M:BUAA.Net.HttpServerLite.SendHeader(System.String,System.String,System.Int32,System.String,System.Net.Sockets.Socket@)">
+            <summary>
+            This function send the Header Inform to the client (Browser)
+            </summary>
+            <param name="sHttpVersion">HTTP Version</param>
+            <param name="sMIMEHeader">Mime Type</param>
+            <param name="iTotBytes">Total Bytes to be sent in the body</param>
+            <param name="mySocket">Socket reference</param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.Net.HttpServerLite.SendToBrowser(System.String,System.Net.Sockets.Socket@)">
+            <summary>
+            Overloaded Function, takes string, convert to bytes and calls 
+            overloaded sendToBrowserFunction.
+            </summary>
+            <param name="sData">The data to be sent to the browser(client)</param>
+            <param name="mySocket">Socket reference</param>
+        </member>
+        <member name="M:BUAA.Net.HttpServerLite.SendToBrowser(System.Byte[],System.Net.Sockets.Socket@)">
+            <summary>
+            Sends data to the browser (client)
+            </summary>
+            <param name="bSendData">Byte Array</param>
+            <param name="mySocket">Socket reference</param>
+        </member>
+        <member name="M:BUAA.Protocol.ByteStream.#ctor(System.Byte[])">
+            <summary>
+            初始一个有效的ByteStream对象
+            </summary>
+            <param name="Data">
+            如果为null则初始化一个可变空间的内存流
+            否则以传入的数组作为空间
+            </param>
+        </member>
+        <member name="M:BUAA.Protocol.ByteStream.#ctor">
+            <summary>
+            初始化一个空的ByteStream对象（需手动初始化内部储存空间）
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombPackage.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombPackage.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombPackage.F0">
+            <summary>
+            标示0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombPackage.F1">
+            <summary>
+            标识1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombPackage.Package">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombProtocol.DefaultS0">
+            <summary>
+            默认桢头S0('C')
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombProtocol.DefaultS1">
+            <summary>
+            默认桢头S1('P')
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombProtocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombProtocol.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.CombProtocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.CombProtocol.ReceivePackageNum">
+            <summary>
+            接收到的帧数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.CombProtocol.FetchPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.CombProtocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.CombProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="F:BUAA.Protocol.GimbalTestProtocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.GimbalTestProtocol.receiveBuffer">
+            <summary>
+            接收字节缓冲区
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.GimbalTestProtocol.receiveBufferState">
+            <summary>
+            接收缓冲区状态机
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.GimbalTestProtocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.GimbalTestProtocol.FetchStandPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.GimbalTestProtocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.GimbalTestProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="T:BUAA.Protocol.FormatErrorEnum">
+            <summary>
+            格式错误枚举
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.FormatErrorEnum.None">
+            <summary>
+            无错误
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.FormatErrorEnum.LengthWrong">
+            <summary>
+            长度错误
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.FormatErrorEnum.CRCWrong">
+            <summary>
+            校验和错位
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.FormatErrorEnum.OutOfBuffer">
+            <summary>
+            帧长度超出缓冲区
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.FormatErrorEnum.FormatWrong">
+            <summary>
+            格式错误
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.FormatErrorEnum.Unidentify">
+            <summary>
+            无法识别
+            </summary>
+        </member>
+        <member name="T:BUAA.Protocol.IProtocol`1">
+            <summary>
+            一般协议数据处理器接口
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelPackageHelper.ALMANAC.ALMANACStruct.rightAscensionRate">
+            <summary>
+            赤经角速度，单位弧度/秒，oω
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelPackageHelper.ALMANAC.ALMANACStruct.rightAscension">
+            <summary>
+            赤经角，单位弧度，ω0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelPackageHelper.ALMANAC.ALMANACStruct.argumentOfPerigee">
+            <summary>
+            近地角，单位弧度，ω
+            </summary>
+        </member>
+        <member name="T:BUAA.Protocol.NovAtelProtocol">
+            <summary>
+            NovAtel协议处理堆栈
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.DefaultS0">
+            <summary>
+            默认桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.DefaultS1">
+            <summary>
+            默认桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.DefaultS2">
+            <summary>
+            默认桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.S2">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.receiveBuffer">
+            <summary>
+            接收字节缓冲区
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.receiveBufferState">
+            <summary>
+            接收缓冲区状态机
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.NovAtelProtocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.NovAtelProtocol.ReceivePackageNum">
+            <summary>
+            接收到的帧数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.NovAtelProtocol.FetchPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.NovAtelProtocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.NovAtelProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Package.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Package.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Package.Reserve">
+            <summary>
+            保留位
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Package.Package">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Package.Sum">
+            <summary>
+            CheckSum
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.iFlyG2Package.PackageLength">
+            <summary>
+            数据长度
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.iFlyG2Package.#ctor(System.Byte,System.Byte,BUAA.Protocol.BasePackage)">
+            <summary>
+            以基本数据初始化
+            </summary>
+            <param name="ProtocolID">协议ID</param>
+            <param name="IsEncrypt">加密位</param>
+            <param name="Data">数据</param>
+        </member>
+        <member name="M:BUAA.Protocol.iFlyG2Package.#ctor(BUAA.Protocol.BasePackage)">
+            <summary>
+            以基本数据初始化
+            默认S0=0,S1=0
+            </summary>
+            <param name="ProtocolID"></param>
+            <param name="Data"></param>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.DefaultS0">
+            <summary>
+            默认桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.DefaultS1">
+            <summary>
+            默认桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.receiveBuffer">
+            <summary>
+            接收字节缓冲区
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.receiveBufferState">
+            <summary>
+            接收缓冲区状态机
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.iFlyG2Protocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.iFlyG2Protocol.ReceivePackageNum">
+            <summary>
+            接收到的帧数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.iFlyG2Protocol.FetchPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.iFlyG2Protocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.iFlyG2Protocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.F0">
+            <summary>
+            标示0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.F1">
+            <summary>
+            标识1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.Counter">
+            <summary>
+            序号
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.PackageNum">
+            <summary>
+            分包个数
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.PackageNo">
+            <summary>
+            分包序号
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.Package">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitPackage.CRC16">
+            <summary>
+            校验和
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitProtocol.DefaultS0">
+            <summary>
+            默认桢头S0('S')
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitProtocol.DefaultS1">
+            <summary>
+            默认桢头S1('P')
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitProtocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitProtocol.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.SplitProtocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.SplitProtocol.ReceivePackageNum">
+            <summary>
+            接收到的帧数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.SplitProtocol.FetchPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.SplitProtocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.SplitProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="F:BUAA.Protocol.StandardPackage.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardPackage.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardPackage.Property">
+            <summary>
+            属性
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardPackage.Package">
+            <summary>
+            数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardPackage.CRC16">
+            <summary>
+            CRC16校验
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.StandardPackage.PackageLength">
+            <summary>
+            数据长度
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.StandardPackage.ProtocolID">
+            <summary>
+            读取或设置属性中的协议ID
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.StandardPackage.IsEncrypt">
+            <summary>
+            读取或设置属性中的是否加密位
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.StandardPackage.#ctor(System.Byte,System.Byte,System.Byte,System.Boolean,BUAA.Protocol.IPackage)">
+            <summary>
+            以基本数据初始化
+            </summary>
+            <param name="ProtocolID">协议ID</param>
+            <param name="IsEncrypt">加密位</param>
+            <param name="Data">数据</param>
+        </member>
+        <member name="M:BUAA.Protocol.StandardPackage.#ctor(System.Byte,BUAA.Protocol.IPackage)">
+            <summary>
+            以基本数据初始化
+            默认S0=0,S1=0,IsEncrypt=false
+            </summary>
+            <param name="ProtocolID"></param>
+            <param name="Data"></param>
+        </member>
+        <member name="M:BUAA.Protocol.StandardPackage.Encrypt(System.Byte[],System.Byte[])">
+            <summary>
+            加密结构体中数据
+            </summary>
+            <param name="Key1">XXTEA密钥</param>
+            <param name="Key2">XOR密钥</param>
+        </member>
+        <member name="M:BUAA.Protocol.StandardPackage.Decrypt(System.Byte[],System.Byte[])">
+            <summary>
+            解密结构体中数据
+            </summary>
+            <param name="Key1">XXTEA密钥</param>
+            <param name="Key2">XOR密钥</param>
+        </member>
+        <member name="T:BUAA.Protocol.StandardSerialProtocol">
+            <summary>
+            标准串行数据协议处理堆栈
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.DefaultS0">
+            <summary>
+            默认桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.DefaultS1">
+            <summary>
+            默认桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.AutoEncrypt">
+            <summary>
+            是否自动加发送的数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.AutoDecrypt">
+            <summary>
+            是否自动解密接收的数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.Key1">
+            <summary>
+            XXTEA Key
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.Key2">
+            <summary>
+            XOR Key
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.receiveBuffer">
+            <summary>
+            接收字节缓冲区
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.receiveBufferState">
+            <summary>
+            接收缓冲区状态机
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.StandardSerialProtocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.StandardSerialProtocol.ReceivePackageNum">
+            <summary>
+            接收到的帧数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.StandardSerialProtocol.FetchPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.StandardSerialProtocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.StandardSerialProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="T:BUAA.Protocol.TCPLite">
+            <summary>
+            具有数据通讯可靠性保护的精简型通讯库
+            保证数据顺序正确、自动重发、错误可检测
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.TCPLite.TimeOut">
+            <summary>
+            重试等待时间
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.TCPLite.RetryTimes">
+            <summary>
+            重试次数
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.TCPLite.ResponseTimes">
+            <summary>
+            应答等待时间
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.TCPLite.SleepTime">
+            <summary>
+            工作线程休眠时间
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.TCPLite.DataSendCallBack">
+            <summary>
+            数据发送回调函数
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.TCPLite.ReceivedCount">
+            <summary>
+            接收缓冲中的数据个数
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.TCPLite.ToSendCount">
+            <summary>
+            发送缓冲中的数据个数
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.TCPLite.FetchReceivedFrame">
+            <summary>
+            取出接收缓冲中的数据帧
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:BUAA.Protocol.TCPLite.IsConnected">
+            <summary>
+            标示是否与远程建立连接
+            </summary>
+        </member>
+        <member name="E:BUAA.Protocol.TCPLite.OnReceiveFrame">
+            <summary>
+            接收到数据帧时被调用
+            </summary>
+        </member>
+        <member name="E:BUAA.Protocol.TCPLite.OnConnectionStateChange">
+            <summary>
+            连接状态发生改变时被调用
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.TCPLite.RegPort(System.Byte,System.Action{BUAA.Protocol.TCPLite,BUAA.Protocol.TCPLitePackage})">
+            <summary>
+            注册指定的端口号响应程序
+            </summary>
+            <param name="Port">端口号(0-3)</param>
+            <param name="Fun">收到指定端口号数据时被调用的时的回调函数</param>
+        </member>
+        <member name="M:BUAA.Protocol.TCPLite.RegPort(System.Byte,System.Action{BUAA.Protocol.IPackage})">
+            <summary>
+            注册指定的端口号响应程序
+            </summary>
+            <param name="Port">端口号(0-3)</param>
+            <param name="Fun">收到指定端口号数据时被调用的时的回调函数</param>
+        </member>
+        <member name="M:BUAA.Protocol.TCPLite.Send(System.Byte,BUAA.Protocol.IPackage)">
+            <summary>
+            发送数据
+            </summary>
+            <param name="Port">目标端口号</param>
+            <param name="Package">待发送数据，不应为空。</param>
+            <returns>是否成功进入待发送序列</returns>
+        </member>
+        <member name="M:BUAA.Protocol.TCPLite.Send(BUAA.Protocol.TCPLitePackage)">
+            <summary>
+            发送数据
+            </summary>
+            <param name="TCPLiteData">待发送数据结构体</param>
+            <returns>是否成功进入待发送序列</returns>
+            <remarks>TCPLiteData.ID无需设置</remarks>
+        </member>
+        <member name="M:BUAA.Protocol.TCPLite.Send(BUAA.Protocol.TCPLiteStateStruct)">
+            <summary>
+            发送数据
+            </summary>
+            <param name="TCPLiteState">待发送数据状态结构体</param>
+            <returns>是否成功进入待发送序列</returns>
+            <remarks>可定制TCPLiteState中的事件</remarks>
+        </member>
+        <member name="T:BUAA.Protocol.TCPLiteStateStruct">
+            <summary>
+            帧传输状态对象
+            </summary>
+        </member>
+        <member name="T:BUAA.Protocol.TCPLiteStateStruct.TCPLiteStateEnum">
+            <summary>
+            帧传输状态
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.TCPLiteStateStruct.TCPLiteData">
+            <summary>
+            储存帧数据
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.TCPLiteStateStruct.Fail">
+            <summary>
+            标示是否传输失败
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.TCPLiteStateStruct.Done">
+            <summary>
+            标示是否成功完成
+            </summary>
+        </member>
+        <member name="E:BUAA.Protocol.TCPLiteStateStruct.OnStateChange">
+            <summary>
+            当传输状态发生改变时被调用
+            </summary>
+        </member>
+        <member name="E:BUAA.Protocol.TCPLiteStateStruct.OnStateOver">
+            <summary>
+            当传输结束(成功或失败)时被调用
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.TCPLiteStateStruct.TCPLiteState">
+            <summary>
+            标示传输状态
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.Class">
+            <summary>
+            数据分组
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.ID">
+            <summary>
+            数据编号
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.UBXPackage.DataLength">
+            <summary>
+            数据长度
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.Data">
+            <summary>
+            承载的数据
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.CK_A">
+            <summary>
+            校验A
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXPackage.CK_B">
+            <summary>
+            校验B
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.UBXPackageHelper.RXMRAW.packageLength">
+            <summary>
+            数据包总长度为8+24*numSV
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.DefaultS0">
+            <summary>
+            默认桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.DefaultS1">
+            <summary>
+            默认桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.S0">
+            <summary>
+            桢头S0
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.S1">
+            <summary>
+            桢头S1
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.receiveBuffer">
+            <summary>
+            接收字节缓冲区
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.receiveBufferState">
+            <summary>
+            接收缓冲区状态机
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.UBXProtocol.ReceivedPackages">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="P:BUAA.Protocol.UBXProtocol.ReceivePackageNum">
+            <summary>
+            接收到的帧数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.UBXProtocol.FetchPackage">
+            <summary>
+            取出最早的一个数据包（如列队为空则返回null）
+            此函数支持多线程安全
+            </summary>
+            <returns>早的一个数据包</returns>
+        </member>
+        <member name="M:BUAA.Protocol.UBXProtocol.ResetReceiveState">
+            <summary>
+            重置数据接收状态机
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.UBXProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="F:BUAA.Protocol.XPlaneProtocol.Head">
+            <summary>
+            帧头
+            </summary>
+        </member>
+        <member name="F:BUAA.Protocol.XPlaneProtocol.ReceivedXplaneData">
+            <summary>
+            接收到的帧队列
+            </summary>
+        </member>
+        <member name="M:BUAA.Protocol.XPlaneProtocol.ProcessRAWByte(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            串行原始字节解析
+            </summary>
+            <param name="Buffer">待解析字节缓冲区</param>
+            <param name="Offset">起始位置</param>
+            <param name="Length">长度</param>
+            <returns>此次接收到的帧数</returns>
+        </member>
+        <member name="M:BUAA.Protocol.XPlaneProtocol.GenerateRAWByte(BUAA.Protocol.XplaneDataPackage[],BUAA.Protocol.ByteStream)">
+            <summary>
+            生成字节流
+            </summary>
+            <param name="packages"></param>
+            <param name="bs"></param>
+        </member>
+        <member name="T:BUAA.Structure.CycleList`1">
+            <summary>
+            循环列队容器
+            提供一个指定大小的泛型容器，当容器填满之后添加的对象会挤出最老的对象。
+            </summary>
+            <remarks>
+            先入低址，向上生长。
+            </remarks>
+            <typeparam name="T">待储存泛型对象类型</typeparam>
+        </member>
+        <member name="T:BUAA.Structure.CycleList`1.ThrowObeject">
+            <summary>
+            OnThrowObeject事件的函数模板
+            </summary>
+            <param name="ThrowedObject">被丢弃的对象</param>
+        </member>
+        <member name="E:BUAA.Structure.CycleList`1.OnThrowObeject">
+            <summary>
+            当需要丢弃对象时引发
+            </summary>
+        </member>
+        <member name="M:BUAA.Structure.CycleList`1.#ctor(System.Int32)">
+            <summary>
+            以指定的容量初始化容器
+            </summary>
+            <param name="Capacity">容量</param>
+        </member>
+        <member name="M:BUAA.Structure.CycleList`1.#ctor">
+            <summary>
+            串行化用
+            </summary>
+        </member>
+        <member name="P:BUAA.Structure.CycleList`1.Capacity">
+            <summary>
+            读取或设置容量
+            当设置的容量等于0时会回收储存空间
+            当设置的容量不等于当前值时会引起储存空间的重新分配，已有空间及数据被回收。
+            </summary>
+            <exception cref="T:System.ArgumentException">当设置的容量小于0时会引发</exception>
+        </member>
+        <member name="P:BUAA.Structure.CycleList`1.Amount">
+            <summary>
+            已储存的数据数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Structure.CycleList`1.Clear">
+            <summary>
+            清空数据
+            </summary>
+            <remarks>
+            并不重新获取储存空间，只影响容器内部索引值。
+            </remarks>
+        </member>
+        <member name="M:BUAA.Structure.CycleList`1.InsertObject(`0)">
+            <summary>
+            插入新的对象至顶部
+            </summary>
+            <param name="Object">待插入对象</param>
+            <exception cref="T:System.InvalidOperationException">当列队已满时会使用新的对象覆盖最旧对象，并引发OnThrowObeject事件。</exception>
+        </member>
+        <member name="M:BUAA.Structure.CycleList`1.InsertObjects(`0[])">
+            <summary>
+            插入新的对象数组至顶部
+            </summary>
+            <param name="Objects">待插入对象数组</param>
+            <exception cref="T:System.InvalidOperationException">当列队已满时会使用新的对象覆盖最旧对象，并引发OnThrowObeject事件。</exception>
+            <exception cref="T:System.ArgumentNullException">当传入对象为空时引发</exception>
+        </member>
+        <member name="M:BUAA.Structure.CycleList`1.FetchObject">
+            <summary>
+            取出最底部对象
+            </summary>
+            <returns>取出的对象</returns>
+            <exception cref="T:System.InvalidOperationException">如列队为空则会引发</exception>
+        </member>
+        <member name="P:BUAA.Structure.CycleList`1.Item(System.Int32)">
+            <summary>
+            读取列队中的指定数据
+            </summary>
+            <param name="index">对象所处位置序号</param>
+            <returns>说访问对象</returns>
+            <exception cref="T:System.IndexOutOfRangeException">超出索引范围时引发</exception>
+        </member>
+        <member name="P:BUAA.Structure.CycleList`1.Items">
+            <summary>
+            获取排序好的对象数组
+            </summary>
+        </member>
+        <member name="T:BUAA.Structure.StackLimited`1">
+            <summary>
+            有限长度的栈
+            提供一个指定大小的泛型容器，当容器填满之后添加的对象会挤出最老的对象。
+            </summary>
+            <remarks>
+            先入低址，向上生长。
+            </remarks>
+            <typeparam name="T">待储存泛型对象类型</typeparam>
+        </member>
+        <member name="T:BUAA.Structure.StackLimited`1.ThrowObeject">
+            <summary>
+            OnThrowObeject事件的函数模板
+            </summary>
+            <param name="ThrowedObject">被丢弃的对象</param>
+        </member>
+        <member name="E:BUAA.Structure.StackLimited`1.OnThrowObeject">
+            <summary>
+            当需要丢弃对象时引发
+            </summary>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.#ctor(System.Int32)">
+            <summary>
+            以指定的容量初始化容器
+            </summary>
+            <param name="Capacity">容量</param>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.#ctor">
+            <summary>
+            串行化用
+            </summary>
+        </member>
+        <member name="P:BUAA.Structure.StackLimited`1.Capacity">
+            <summary>
+            读取或设置容量
+            当设置的容量等于0时会回收储存空间
+            当设置的容量不等于当前值时会引起储存空间的重新分配，已有空间及数据被回收。
+            </summary>
+            <exception cref="T:System.ArgumentException">当设置的容量小于0时会引发</exception>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.isEmpty">
+            <summary>
+            栈是否为空
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:BUAA.Structure.StackLimited`1.Count">
+            <summary>
+            已储存的数据数量
+            </summary>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.Clear">
+            <summary>
+            清空数据
+            </summary>
+            <remarks>
+            并不重新获取储存空间，只影响容器内部索引值。
+            </remarks>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.Push(`0)">
+            <summary>
+            插入新的对象
+            </summary>
+            <param name="Object">待插入对象</param>
+            <exception cref="T:System.InvalidOperationException">当栈已满时会使用新的对象覆盖最旧对象，并引发OnThrowObeject事件。</exception>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.Push(`0[])">
+            <summary>
+            插入新的对象数组
+            </summary>
+            <param name="Objects">待插入对象数组</param>
+            <exception cref="T:System.InvalidOperationException">当栈已满时会使用新的对象覆盖最旧对象，并引发OnThrowObeject事件。</exception>
+            <exception cref="T:System.ArgumentNullException">当传入对象为空时引发</exception>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.Pop">
+            <summary>
+            弹出栈顶对象
+            </summary>
+            <returns>弹出的对象</returns>
+            <exception cref="T:System.InvalidOperationException">如栈为空则会引发</exception>
+        </member>
+        <member name="M:BUAA.Structure.StackLimited`1.Peek">
+            <summary>
+            读取栈顶对象而不弹出
+            </summary>
+            <returns>读取的对象</returns>
+            <exception cref="T:System.InvalidOperationException">如栈为空则会引发</exception>
+        </member>
+        <member name="M:BUAA.SystemMisc.NetInfo.GetFirstAvailablePort">
+            <summary>
+            获取第一个可用的端口号
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.SystemMisc.NetInfo.GetUsedPorts">
+            <summary>
+            获取操作系统已用的端口号
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.SystemMisc.NetInfo.PortIsAvailable(System.Int32)">
+            <summary>
+            检查指定端口是否已用
+            </summary>
+            <param name="port"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.SystemMisc.NetInfo.GetLocalIPAddress">
+            <summary>
+            获取本机IP
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.SystemMisc.NetInfo.GetLocalIPAddressV4">
+            <summary>
+            获取本机IPv4
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BUAA.SystemMisc.Hotkey.Regist(System.IntPtr,BUAA.SystemMisc.Hotkey.HotkeyModifiers,System.Windows.Forms.Keys,BUAA.SystemMisc.Hotkey.HotKeyCallBackHanlder)">
+            <summary> 
+            注册快捷键 
+            </summary> 
+            <param name="hWnd">持有快捷键窗口的句柄</param> 
+            <param name="fsModifiers">组合键</param> 
+            <param name="vk">快捷键的虚拟键码</param> 
+            <param name="callBack">回调函数</param> 
+        </member>
+        <member name="M:BUAA.SystemMisc.Hotkey.UnRegist(System.IntPtr,BUAA.SystemMisc.Hotkey.HotKeyCallBackHanlder)">
+            <summary> 
+            注销快捷键 
+            </summary> 
+            <param name="hWnd">持有快捷键窗口的句柄</param> 
+            <param name="callBack">回调函数</param> 
+        </member>
+        <member name="M:BUAA.SystemMisc.Hotkey.ProcessHotKey(System.Windows.Forms.Message)">
+            <summary> 
+            快捷键消息处理 
+            </summary> 
+            <example>
+            protected override void WndProc(ref Message m)
+            {
+               HotkeyObj.ProcessHotKey(m);
+               base.WndProc(ref m);
+            }
+            </example>
+        </member>
+        <member name="F:BUAA.Tools.CrashReport.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:BUAA.Tools.CrashReport.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:BUAA.Tools.CrashReport.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="M:BUAA.Tools.TriggerAccumulater.#ctor(System.Int32)">
+            <summary>
+            初始化触发累计器
+            </summary>
+            <param name="CalcInterval">计算间隔(ms)</param>
+        </member>
+    </members>
+</doc>

@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="iFlyLibrary">
+      <HintPath>..\Library\iFlyLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,9 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressDataGroup.cs" />
-    <Compile Include="FlashJob.cs" />
+    <Compile Include="Job.cs" />
     <Compile Include="IntelHexLoader.cs" />
     <Compile Include="IntelHexParser.cs" />
+    <Compile Include="JobExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

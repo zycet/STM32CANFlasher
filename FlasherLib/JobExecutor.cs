@@ -5,13 +5,8 @@ using System.Text;
 
 namespace BUAA
 {
-    public enum JobTypeEnum
+    public class JobExecutor
     {
 
-    }
-
-    public class FlashJob
-    {
-        
     }
 }
