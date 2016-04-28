@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="AddressDataGroup.cs" />
     <Compile Include="FlashJob.cs" />
+    <Compile Include="IntelHexLoader.cs" />
     <Compile Include="IntelHexParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

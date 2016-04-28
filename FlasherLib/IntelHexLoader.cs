@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BUAA.Misc;
 using BUAA.Structure;
 using System.IO;
 
-namespace STM32CANFlasher
+namespace BUAA.Misc
 {
     public class IntelHexLoader
     {
