@@ -205,7 +205,7 @@ namespace BUAA
                 //READ
                 else if (j.Type == Job.JobType.Read)
                 {
-                    int m = j.DataNum / 8;
+                    int m = (int)Math.Ceiling(j.DataNum / 8f);
                     if (_StepRunning == 1)//ACK
                     {
                         if (CheckCANMessage(CANMessage, ID_READ, DA_ACK))
@@ -247,6 +247,33 @@ namespace BUAA
                     else
                     {
                         TimeoutCheck();
+                    }
+                }
+                //WRITE
+                else if (j.Type == Job.JobType.Write)
+                {
+                    int m = (int)Math.Ceiling(j.DataNum / 8f);
+                    if (_StepRunning % 2 == 1 && _StepRunning <= 2 * m + 1)
+                    {
+                        if (CheckCANMessage(CANMessage, ID_WRITE, DA_ACK))
+                        {
+                            _StepRunning++;
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                    else if (_StepRunning == 2 * m + 3)
+                    {
+                        if (CheckCANMessage(CANMessage, ID_WRITE, DA_ACK))
+                        {
+                            RunningNext();
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
                     }
                 }
                 //GV
@@ -327,7 +354,7 @@ namespace BUAA
                     }
                 }
                 //READ
-                if (j.Type == Job.JobType.Read)
+                else if (j.Type == Job.JobType.Read)
                 {
                     if (_StepRunning == 0)
                     {
@@ -335,6 +362,36 @@ namespace BUAA
                         j.AddressTo(data, 0);
                         data[4] = (byte)(j.DataNum - 1);
                         SendCANCmdData(ID_READ, data);
+                        _StepRunning++;
+                    }
+                    else
+                    {
+                        TimeoutCheck();
+                    }
+                }
+                //WRITE
+                else if (j.Type == Job.JobType.Read)
+                {
+                    int m = (int)Math.Ceiling(j.DataNum / 8f);
+                    if (_StepRunning == 0)
+                    {
+                        byte[] data = new byte[5];
+                        j.AddressTo(data, 0);
+                        data[4] = (byte)(j.DataNum - 1);
+                        SendCANCmdData(ID_WRITE, data);
+                        _StepRunning++;
+                    }
+                    else if (_StepRunning % 2 == 0 && _StepRunning <= 2 * m + 2)
+                    {
+                        int n = (_StepRunning - 2) / 2;
+                        int len = n = j.DataNum - n * 8;
+                        if (len > 8)
+                            len = 8;
+
+                        byte[] data = new byte[len];
+                        Array.Copy(j.DataSend, n * 8, data, 0, len);
+
+                        SendCANCmdData(ID_WRITEDATA, data);
                         _StepRunning++;
                     }
                     else
@@ -366,6 +423,8 @@ namespace BUAA
         public const uint ID_NACK = 0x1F;
         public const uint ID_GV = 0x01;
         public const uint ID_READ = 0x011;
+        public const uint ID_WRITE = 0x031;
+        public const uint ID_WRITEDATA = 0x04;
 
         public const byte DA_ACK = 0x79;
         public const byte DA_NACK = 0x1F;

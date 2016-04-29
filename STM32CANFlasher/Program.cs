@@ -16,18 +16,18 @@ namespace STM32CANFlasher
         {
             //HexTest();
 
+            READTest();
+            ACKTest();
+        }
+
+        private static void READTest()
+        {
             ICAN eCAN = new ECANDev();
             eCAN.Open(0);
             eCAN.Start(0, 125000, false, true, false);
 
             JobExecutor JE = new JobExecutor(eCAN, 0);
             JE.OnStateChange += JE_OnStateChange;
-
-            //Job[] js = new Job[3];
-            //js[0] = new Job(Job.JobType.ACK);
-            //js[1] = new Job(Job.JobType.GetState);
-            //js[2] = new Job(Job.JobType.ACK);
-            //JE.SetJob(js);
 
             Job j = new Job(Job.JobType.Read);
             j.Address = 0x8000000;
@@ -40,7 +40,28 @@ namespace STM32CANFlasher
                 JE.BackgroundRun(false);
                 Thread.Sleep(100);
             }
+        }
 
+        private static void ACKTest()
+        {
+            ICAN eCAN = new ECANDev();
+            eCAN.Open(0);
+            eCAN.Start(0, 125000, false, true, false);
+
+            JobExecutor JE = new JobExecutor(eCAN, 0);
+            JE.OnStateChange += JE_OnStateChange;
+
+            Job[] js = new Job[3];
+            js[0] = new Job(Job.JobType.ACK);
+            js[1] = new Job(Job.JobType.GetState);
+            js[2] = new Job(Job.JobType.ACK);
+            JE.SetJob(js);
+
+            while (true)
+            {
+                JE.BackgroundRun(false);
+                Thread.Sleep(100);
+            }
         }
 
         private static void JE_OnStateChange(JobExecutor Executor, JobExecutor.JobEventType EventType, int JobNo, Job Job, string Msg)
