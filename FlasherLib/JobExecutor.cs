@@ -63,7 +63,7 @@ namespace BUAA
         #region State
 
         Job[] Jobs;
-        int _NoJobRunning;
+        int _NoRunning;
         int _StepRunning;
 
         public bool IsRunning
@@ -72,9 +72,9 @@ namespace BUAA
             {
                 if (Jobs == null)
                     return false;
-                if (_NoJobRunning < 0)
+                if (_NoRunning < 0)
                     return false;
-                if (_NoJobRunning >= Jobs.Length)
+                if (_NoRunning >= Jobs.Length)
                     return false;
                 return true;
             }
@@ -86,7 +86,7 @@ namespace BUAA
             {
                 if (IsRunning == false)
                     return null;
-                return Jobs[_NoJobRunning];
+                return Jobs[_NoRunning];
             }
         }
 
@@ -94,7 +94,7 @@ namespace BUAA
         {
             get
             {
-                return _NoJobRunning;
+                return _NoRunning;
             }
         }
 
@@ -107,13 +107,15 @@ namespace BUAA
             Normal, NACK, UnknowACK, Timeout, Abort
         }
 
-        public event Action<JobExecutor, JobEventType, int, string> OnStateChange;
+        public delegate void StateChange(JobExecutor Executor, JobEventType EventType, int JobNo, Job Job, string Msg);
+
+        public event StateChange OnStateChange;
 
         #endregion
 
         #region Action
 
-        public bool SetJobs(Job[] Jobs)
+        public bool SetJob(Job[] Jobs)
         {
             if (IsRunning)
             {
@@ -122,15 +124,36 @@ namespace BUAA
             else
             {
                 this.Jobs = Jobs;
-                _NoJobRunning = 0;
+                _NoRunning = 0;
                 _StepRunning = 0;
                 return true;
             }
         }
 
-        public void BackgroundRun()
+        public bool SetJob(Job Job)
         {
+            Job[] jobs = { Job };
+            return SetJob(jobs);
+        }
 
+        public Job[] GetJob()
+        {
+            return Jobs;
+        }
+
+        public void BackgroundRun(bool IsUserAbort)
+        {
+            Executor(IsUserAbort);
+
+            CANMessage[] canMessages = new CANMessage[32];
+            int num = CANDevice.Receive(CANPortIndex, canMessages);
+            for (int i = 0; i < num; i++)
+            {
+                Executor(canMessages[i]);
+                Executor();
+            }
+
+            Executor();
         }
 
         #endregion
@@ -145,7 +168,7 @@ namespace BUAA
                 {
                     if (IsUserAbort == true)
                     {
-                        RunningOver(JobEventType.Abort, "User Abort");
+                        RunningNext(JobEventType.Abort, "User Abort");
                     }
                 }
             }
@@ -162,11 +185,25 @@ namespace BUAA
                     return;
 
                 Job j = JobRunning;
-                if (j.Type == Job.JobType.GetState)
+                if (j.Type == Job.JobType.ACK)
                 {
                     if (_StepRunning == 1)
                     {
-                        if (CheckACKData(CANMessage, ID_GV))
+                        if (CheckCANMessage(CANMessage, ID_ACK, 1) && CANMessage.Data[0] == 0x1F)
+                        {
+                            RunningNext();
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                }
+                else if (j.Type == Job.JobType.GetState)
+                {
+                    if (_StepRunning == 1)
+                    {
+                        if (CheckCANMessage(CANMessage, ID_GV, 1) && CANMessage.Data[0] == DA_ACK)
                         {
                             _StepRunning++;
                         }
@@ -204,16 +241,9 @@ namespace BUAA
                     }
                     else if (_StepRunning == 4)
                     {
-                        if (CheckACKData(CANMessage, ID_GV))
+                        if (CheckCANMessage(CANMessage, ID_GV, 1) && CANMessage.Data[0] == DA_ACK)
                         {
-                            if (_NoJobRunning == Jobs.Length - 1)
-                            {
-                                RunningOver(JobEventType.Normal, "All Done");
-                            }
-                            else
-                            {
-                                RunningNext(j.Type.ToString() + " Done");
-                            }
+                            RunningNext();
                         }
                         else
                         {
@@ -232,7 +262,19 @@ namespace BUAA
                 if (!IsRunning)
                     return;
                 Job j = JobRunning;
-                if (j.Type == Job.JobType.GetState)
+                if (j.Type == Job.JobType.ACK)
+                {
+                    if (_StepRunning == 0)
+                    {
+                        SendCANCmd(ID_ACK);
+                        _StepRunning++;
+                    }
+                    else
+                    {
+                        TimeoutCheck();
+                    }
+                }
+                else if (j.Type == Job.JobType.GetState)
                 {
                     if (_StepRunning == 0)
                     {
@@ -284,20 +326,11 @@ namespace BUAA
         {
             if (DateTime.Now - lastSendTime > TimeoutSpan)
             {
-                RunningOver(JobEventType.Timeout, "Timeout");
+                RunningNext(JobEventType.Timeout, "Timeout");
             }
         }
 
-        bool CheckACKData(CANMessage CANMessage, uint ID)
-        {
-            if (!CheckCANMessage(CANMessage, ID, 1))
-                return false;
-            if (CANMessage.Data[0] != DA_ACK)
-                return false;
-            return true;
-        }
-
-        bool CheckCANMessage(CANMessage CANMessage, uint ID, int DataLen)
+        static bool CheckCANMessage(CANMessage CANMessage, uint ID, int DataLen)
         {
             if (CANMessage.ID != ID)
                 return false;
@@ -309,24 +342,37 @@ namespace BUAA
         #endregion
 
         #region ChangeState
-
-        void RunningOver(JobEventType Type, string Message)
+        
+        void RunningNext()
         {
-            int lastNoCunning = _NoJobRunning;
-            _NoJobRunning = -1;
-            if (Type == JobEventType.Normal)
-                JobRunning.State = Job.JobState.Done;
-            else
-                JobRunning.State = Job.JobState.Fail;
-            OnStateChange?.Invoke(this, Type, lastNoCunning, Message);
+            RunningNext(JobEventType.Normal, JobRunning.Type.ToString() + " Done");
         }
 
-        void RunningNext(string Message)
+        void RunningNext(JobEventType Type, string Message)
         {
-            int lastNoCunning = _NoJobRunning;
-            JobRunning.State = Job.JobState.Done;
-            _NoJobRunning++;
-            OnStateChange?.Invoke(this, JobEventType.Normal, lastNoCunning, Message);
+            int lastNoCunning = _NoRunning;
+            Job lastJobRunning = JobRunning;
+
+            if (Type == JobEventType.Normal)
+            {
+                lastJobRunning.State = Job.JobState.Done;
+                if (_NoRunning < Jobs.Length - 1)
+                {
+                    _NoRunning++;
+                }
+                else
+                {
+                    _NoRunning = -1;
+                }
+            }
+            else
+            {
+                lastJobRunning.State = Job.JobState.Fail;
+                _NoRunning = -1;
+            }
+            _StepRunning = 0;
+
+            OnStateChange?.Invoke(this, Type, lastNoCunning, lastJobRunning, Message);
         }
 
         #endregion
