@@ -174,6 +174,7 @@ namespace BUAA
             }
         }
 
+        //Executor Process Message 
         public void Executor(CANMessage CANMessage)
         {
             lock (this)
@@ -185,11 +186,13 @@ namespace BUAA
                     return;
 
                 Job j = JobRunning;
+
+                //ACK
                 if (j.Type == Job.JobType.ACK)
                 {
                     if (_StepRunning == 1)
                     {
-                        if (CheckCANMessage(CANMessage, ID_ACK, 1) && CANMessage.Data[0] == 0x1F)
+                        if (CheckCANMessage(CANMessage, ID_ACK, DA_NACK))
                         {
                             RunningNext();
                         }
@@ -199,11 +202,59 @@ namespace BUAA
                         }
                     }
                 }
+                //READ
+                else if (j.Type == Job.JobType.Read)
+                {
+                    int m = j.DataNum / 8;
+                    if (_StepRunning == 1)//ACK
+                    {
+                        if (CheckCANMessage(CANMessage, ID_READ, DA_ACK))
+                        {
+                            _StepRunning++;
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                    else if (_StepRunning >= 2 && _StepRunning <= m + 1)//DATA
+                    {
+                        if (CheckCANMessage(CANMessage, ID_READ) && CANMessage.DataLen > 0)
+                        {
+                            if (_StepRunning == 2)
+                            {
+                                j.DataReceive = new byte[j.DataNum];
+                            }
+                            Array.Copy(CANMessage.Data, 0, j.DataReceive, (_StepRunning - 2) * CANMessage.DataLenMax, CANMessage.DataLen);
+                            _StepRunning++;
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                    else if (_StepRunning == m + 2)//ACK
+                    {
+                        if (CheckCANMessage(CANMessage, ID_READ, DA_ACK))
+                        {
+                            RunningNext();
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                    else
+                    {
+                        TimeoutCheck();
+                    }
+                }
+                //GV
                 else if (j.Type == Job.JobType.GetState)
                 {
                     if (_StepRunning == 1)
                     {
-                        if (CheckCANMessage(CANMessage, ID_GV, 1) && CANMessage.Data[0] == DA_ACK)
+                        if (CheckCANMessage(CANMessage, ID_GV, DA_ACK))
                         {
                             _StepRunning++;
                         }
@@ -241,7 +292,7 @@ namespace BUAA
                     }
                     else if (_StepRunning == 4)
                     {
-                        if (CheckCANMessage(CANMessage, ID_GV, 1) && CANMessage.Data[0] == DA_ACK)
+                        if (CheckCANMessage(CANMessage, ID_GV, DA_ACK))
                         {
                             RunningNext();
                         }
@@ -254,7 +305,7 @@ namespace BUAA
             }
         }
 
-
+        //Executor Process State&Time 
         public void Executor()
         {
             lock (this)
@@ -262,6 +313,7 @@ namespace BUAA
                 if (!IsRunning)
                     return;
                 Job j = JobRunning;
+                //ACK
                 if (j.Type == Job.JobType.ACK)
                 {
                     if (_StepRunning == 0)
@@ -274,6 +326,23 @@ namespace BUAA
                         TimeoutCheck();
                     }
                 }
+                //READ
+                if (j.Type == Job.JobType.Read)
+                {
+                    if (_StepRunning == 0)
+                    {
+                        byte[] data = new byte[5];
+                        j.AddressTo(data, 0);
+                        data[4] = (byte)(j.DataNum - 1);
+                        SendCANCmdData(ID_READ, data);
+                        _StepRunning++;
+                    }
+                    else
+                    {
+                        TimeoutCheck();
+                    }
+                }
+                //GV
                 else if (j.Type == Job.JobType.GetState)
                 {
                     if (_StepRunning == 0)
@@ -294,20 +363,28 @@ namespace BUAA
         #region Const
 
         public const uint ID_ACK = 0x79;
+        public const uint ID_NACK = 0x1F;
         public const uint ID_GV = 0x01;
+        public const uint ID_READ = 0x011;
 
         public const byte DA_ACK = 0x79;
+        public const byte DA_NACK = 0x1F;
 
         #endregion
 
         #region Send
 
-        void SendCANCmd(uint ID)
+        void SendCANCmdData(uint ID, byte[] Data)
         {
-            CANMessage message = new CANMessage(ID, false);
+            CANMessage message = new CANMessage(ID, false, Data);
             CANMessage[] messages = { message };
             CANDevice.Send(CANPortIndex, messages);
             lastSendTime = DateTime.Now;
+        }
+
+        void SendCANCmd(uint ID)
+        {
+            SendCANCmdData(ID, null);
         }
 
         public void SendCANCmdACK()
@@ -330,6 +407,13 @@ namespace BUAA
             }
         }
 
+        static bool CheckCANMessage(CANMessage CANMessage, uint ID)
+        {
+            if (CANMessage.ID != ID)
+                return false;
+            return true;
+        }
+
         static bool CheckCANMessage(CANMessage CANMessage, uint ID, int DataLen)
         {
             if (CANMessage.ID != ID)
@@ -339,10 +423,21 @@ namespace BUAA
             return true;
         }
 
+        static bool CheckCANMessage(CANMessage CANMessage, uint ID, byte Data0)
+        {
+            if (CANMessage.ID != ID)
+                return false;
+            if (CANMessage.DataLen != 1)
+                return false;
+            if (CANMessage.Data[0] != Data0)
+                return false;
+            return true;
+        }
+
         #endregion
 
         #region ChangeState
-        
+
         void RunningNext()
         {
             RunningNext(JobEventType.Normal, JobRunning.Type.ToString() + " Done");

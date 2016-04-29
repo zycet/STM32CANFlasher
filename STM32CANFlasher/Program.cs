@@ -23,10 +23,16 @@ namespace STM32CANFlasher
             JobExecutor JE = new JobExecutor(eCAN, 0);
             JE.OnStateChange += JE_OnStateChange;
 
-            Job[] js = new Job[3];
-            js[0] = new Job(Job.JobType.ACK);
-            js[1] = new Job(Job.JobType.GetState);
-            js[2] = new Job(Job.JobType.ACK);
+            //Job[] js = new Job[3];
+            //js[0] = new Job(Job.JobType.ACK);
+            //js[1] = new Job(Job.JobType.GetState);
+            //js[2] = new Job(Job.JobType.ACK);
+            //JE.SetJob(js);
+
+            Job j = new Job(Job.JobType.Read);
+            j.Address = 0x8000000;
+            j.DataNum = 16;
+            Job[] js = { j };
             JE.SetJob(js);
 
             while (true)

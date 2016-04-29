@@ -23,6 +23,8 @@ namespace BUAA
 
         public int Address = 0;
 
+        public int DataNum;
+
         public byte[] DataSend = null;
 
         public byte[] DataReceive = null;
@@ -39,6 +41,16 @@ namespace BUAA
         {
             this.Type = Type;
             this.DataSend = DataSend;
+        }
+
+        public void AddressTo(byte[] Buffer, int Offset)
+        {
+            byte[] bs = BitConverter.GetBytes(Address);
+            int n = bs.Length;
+            for (int i = 0; i < n; i++)
+            {
+                Buffer[Offset + i] = bs[n - i - 1];
+            }
         }
     }
 }
