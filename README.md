@@ -36,5 +36,5 @@ A Tools for Flash the STM32 ARM Chip using CAN-Bus by C#
 * STM32F439xx
 
 参考信息
-* ST AN3154 <CAN Protocol Used in the STM32 Bootloader> V5
-* ST AN2606 <Microcontroller System Memory Boot Mode> V20
+* ST AN3154 "CAN Protocol Used in the STM32 Bootloader" V5
+* ST AN2606 "Microcontroller System Memory Boot Mode" V20
