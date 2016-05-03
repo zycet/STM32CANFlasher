@@ -149,6 +149,10 @@ namespace BUAA
             int num = CANDevice.Receive(CANPortIndex, canMessages);
             for (int i = 0; i < num; i++)
             {
+                if (IsShowSendRecive)
+                {
+                    WriteLine("Receive:" + canMessages[i].ToString());
+                }
                 Executor(canMessages[i]);
                 Executor();
             }
@@ -253,7 +257,7 @@ namespace BUAA
                 else if (j.Type == Job.JobType.Write)
                 {
                     int m = (int)Math.Ceiling(j.DataNum / 8f);
-                    if (_StepRunning % 2 == 1 && _StepRunning <= 2 * m + 1)
+                    if (_StepRunning % 2 == 1 && _StepRunning <= 2 * m - 1)
                     {
                         if (CheckCANMessage(CANMessage, ID_WRITE, DA_ACK))
                         {
@@ -264,11 +268,39 @@ namespace BUAA
                             ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
                         }
                     }
-                    else if (_StepRunning == 2 * m + 3)
+                    else if (_StepRunning == 2 * m + 1)
                     {
                         if (CheckCANMessage(CANMessage, ID_WRITE, DA_ACK))
                         {
                             RunningNext();
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                }
+                //Erase
+                else if (j.Type == Job.JobType.Erase)
+                {
+                    if (_StepRunning == 1)
+                    {
+                        if (CheckCANMessage(CANMessage, ID_ERASE, DA_ACK))
+                        {
+                            _StepRunning++;
+
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                    else if (_StepRunning == 2)
+                    {
+                        if (CheckCANMessage(CANMessage, ID_ERASE, DA_ACK))
+                        {
+                            RunningNext();
+
                         }
                         else
                         {
@@ -329,6 +361,10 @@ namespace BUAA
                         }
                     }
                 }
+                else
+                {
+                    ErrorWriteLine("Unsupport Job:" + j.Type.ToString());
+                }
             }
         }
 
@@ -370,7 +406,7 @@ namespace BUAA
                     }
                 }
                 //WRITE
-                else if (j.Type == Job.JobType.Read)
+                else if (j.Type == Job.JobType.Write)
                 {
                     int m = (int)Math.Ceiling(j.DataNum / 8f);
                     if (_StepRunning == 0)
@@ -381,10 +417,10 @@ namespace BUAA
                         SendCANCmdData(ID_WRITE, data);
                         _StepRunning++;
                     }
-                    else if (_StepRunning % 2 == 0 && _StepRunning <= 2 * m + 2)
+                    else if (_StepRunning % 2 == 0 && _StepRunning <= 2 * m)
                     {
                         int n = (_StepRunning - 2) / 2;
-                        int len = n = j.DataNum - n * 8;
+                        int len = j.DataNum - n * 8;
                         if (len > 8)
                             len = 8;
 
@@ -392,6 +428,19 @@ namespace BUAA
                         Array.Copy(j.DataSend, n * 8, data, 0, len);
 
                         SendCANCmdData(ID_WRITEDATA, data);
+                        _StepRunning++;
+                    }
+                    else
+                    {
+                        TimeoutCheck();
+                    }
+                }
+                //ERASE
+                else if (j.Type == Job.JobType.Erase)
+                {
+                    if (_StepRunning == 0)
+                    {
+                        SendCANCmdData(ID_ERASE, j.DataSend);
                         _StepRunning++;
                     }
                     else
@@ -412,6 +461,10 @@ namespace BUAA
                         TimeoutCheck();
                     }
                 }
+                else
+                {
+                    ErrorWriteLine("Unsupport Job:" + j.Type.ToString());
+                }
             }
         }
 
@@ -425,6 +478,7 @@ namespace BUAA
         public const uint ID_READ = 0x011;
         public const uint ID_WRITE = 0x031;
         public const uint ID_WRITEDATA = 0x04;
+        public const uint ID_ERASE = 0x43;
 
         public const byte DA_ACK = 0x79;
         public const byte DA_NACK = 0x1F;
@@ -433,12 +487,18 @@ namespace BUAA
 
         #region Send
 
+        public bool IsShowSendRecive = true;
+
         void SendCANCmdData(uint ID, byte[] Data)
         {
             CANMessage message = new CANMessage(ID, false, Data);
             CANMessage[] messages = { message };
             CANDevice.Send(CANPortIndex, messages);
             lastSendTime = DateTime.Now;
+            if (IsShowSendRecive)
+            {
+                WriteLine("Send:" + message.ToString());
+            }
         }
 
         void SendCANCmd(uint ID)
