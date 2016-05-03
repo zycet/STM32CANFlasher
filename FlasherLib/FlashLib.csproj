@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressDataGroup.cs" />
+    <Compile Include="ConfigStruct.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="IntelHexLoader.cs" />
     <Compile Include="IntelHexParser.cs" />

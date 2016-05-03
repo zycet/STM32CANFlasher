@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BUAA
+namespace BUAA.Flasher
 {
     public class JobExecutor
     {
@@ -381,6 +381,7 @@ namespace BUAA
                 {
                     if (_StepRunning == 0)
                     {
+                        RunningStrat();
                         SendCANCmd(ID_ACK);
                         _StepRunning++;
                     }
@@ -394,6 +395,7 @@ namespace BUAA
                 {
                     if (_StepRunning == 0)
                     {
+                        RunningStrat();
                         byte[] data = new byte[5];
                         j.AddressTo(data, 0);
                         data[4] = (byte)(j.DataNum - 1);
@@ -411,6 +413,7 @@ namespace BUAA
                     int m = (int)Math.Ceiling(j.DataSend.Length / 8f);
                     if (_StepRunning == 0)
                     {
+                        RunningStrat();
                         byte[] data = new byte[5];
                         j.AddressTo(data, 0);
                         data[4] = (byte)(j.DataSend.Length - 1);
@@ -440,6 +443,7 @@ namespace BUAA
                 {
                     if (_StepRunning == 0)
                     {
+                        RunningStrat();
                         SendCANCmdData(ID_ERASE, j.DataSend);
                         _StepRunning++;
                     }
@@ -453,6 +457,7 @@ namespace BUAA
                 {
                     if (_StepRunning == 0)
                     {
+                        RunningStrat();
                         SendCANCmd(ID_GV);
                         _StepRunning++;
                     }
@@ -596,6 +601,16 @@ namespace BUAA
             _StepRunning = 0;
 
             OnStateChange?.Invoke(this, Type, lastNoCunning, lastJobRunning, Message);
+        }
+
+        void RunningStrat()
+        {
+            RunningStrat(JobEventType.Normal, "Start");
+        }
+
+        void RunningStrat(JobEventType Type, string Message)
+        {
+            OnStateChange?.Invoke(this, Type, _NoRunning, JobRunning, Message);
         }
 
         #endregion
