@@ -130,7 +130,7 @@ namespace BUAA.Misc
                 return ResultEnum.LengthWrong;
 
             //Address
-            byte[] address = HexStringParse(RecordString, offset, 2); offset += 4;
+            byte[] address = HexStringParseMSB(RecordString, offset, 2); offset += 4;
             Record.Address = BitConverter.ToUInt16(address, 0);
 
             //Type
@@ -227,12 +227,22 @@ namespace BUAA.Misc
             return byte.Parse(S.Substring(Offset, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
         }
 
-        byte[] HexStringParse(string S, int Offset, int ByteNum)
+        byte[] HexStringParseMSB(string S, int Offset, int ByteNum)
         {
             byte[] data = new byte[ByteNum];
             for (int i = 0; i < ByteNum; i++)
             {
                 data[ByteNum - i - 1] = HexByteParse(S, Offset + i * 2);
+            }
+            return data;
+        }
+
+        byte[] HexStringParse(string S, int Offset, int ByteNum)
+        {
+            byte[] data = new byte[ByteNum];
+            for (int i = 0; i < ByteNum; i++)
+            {
+                data[i] = HexByteParse(S, Offset + i * 2);
             }
             return data;
         }

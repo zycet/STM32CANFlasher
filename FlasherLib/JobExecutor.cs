@@ -256,23 +256,23 @@ namespace BUAA
                 //WRITE
                 else if (j.Type == Job.JobType.Write)
                 {
-                    int m = (int)Math.Ceiling(j.DataNum / 8f);
-                    if (_StepRunning % 2 == 1 && _StepRunning <= 2 * m - 1)
+                    int m = (int)Math.Ceiling(j.DataSend.Length / 8f);
+                    if (_StepRunning == 2 * m + 2)
                     {
                         if (CheckCANMessage(CANMessage, ID_WRITE, DA_ACK))
                         {
-                            _StepRunning++;
+                            RunningNext();
                         }
                         else
                         {
                             ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
                         }
                     }
-                    else if (_StepRunning == 2 * m + 1)
+                    else if (_StepRunning % 2 == 1 && _StepRunning <= 2 * m + 1)
                     {
                         if (CheckCANMessage(CANMessage, ID_WRITE, DA_ACK))
                         {
-                            RunningNext();
+                            _StepRunning++;
                         }
                         else
                         {
@@ -408,19 +408,19 @@ namespace BUAA
                 //WRITE
                 else if (j.Type == Job.JobType.Write)
                 {
-                    int m = (int)Math.Ceiling(j.DataNum / 8f);
+                    int m = (int)Math.Ceiling(j.DataSend.Length / 8f);
                     if (_StepRunning == 0)
                     {
                         byte[] data = new byte[5];
                         j.AddressTo(data, 0);
-                        data[4] = (byte)(j.DataNum - 1);
+                        data[4] = (byte)(j.DataSend.Length - 1);
                         SendCANCmdData(ID_WRITE, data);
                         _StepRunning++;
                     }
                     else if (_StepRunning % 2 == 0 && _StepRunning <= 2 * m)
                     {
                         int n = (_StepRunning - 2) / 2;
-                        int len = j.DataNum - n * 8;
+                        int len = j.DataSend.Length - n * 8;
                         if (len > 8)
                             len = 8;
 
@@ -445,7 +445,7 @@ namespace BUAA
                     }
                     else
                     {
-                        TimeoutCheck();
+                        TimeoutCheckErase();
                     }
                 }
                 //GV
@@ -516,11 +516,20 @@ namespace BUAA
         #region Check
 
         DateTime lastSendTime;
-        public TimeSpan TimeoutSpan = new TimeSpan(0, 0, 5);
+        public TimeSpan TimeoutSpan = new TimeSpan(0, 0, 2);
+        public TimeSpan TimeoutSpanErase = new TimeSpan(0, 0, 20);
 
         void TimeoutCheck()
         {
             if (DateTime.Now - lastSendTime > TimeoutSpan)
+            {
+                RunningNext(JobEventType.Timeout, "Timeout");
+            }
+        }
+
+        void TimeoutCheckErase()
+        {
+            if (DateTime.Now - lastSendTime > TimeoutSpanErase)
             {
                 RunningNext(JobEventType.Timeout, "Timeout");
             }

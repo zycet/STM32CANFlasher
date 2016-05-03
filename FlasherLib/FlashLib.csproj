@@ -46,6 +46,7 @@
     <Compile Include="IntelHexLoader.cs" />
     <Compile Include="IntelHexParser.cs" />
     <Compile Include="JobExecutor.cs" />
+    <Compile Include="JobMaker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

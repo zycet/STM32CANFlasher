@@ -17,7 +17,33 @@ namespace STM32CANFlasher
             //HexTest();
             //ACKTest();
             //READTest();
-            WRITE_READTest();
+            //WRITE_READTest();
+            //ERASETest();
+            AllTest();
+        }
+
+        private static void ERASETest()
+        {
+            ICAN eCAN = new ECANDev();
+            eCAN.Open(0);
+            eCAN.Start(0, 125000, false, true, false);
+
+            JobExecutor JE = new JobExecutor(eCAN, 0);
+            JE.OnStateChange += JE_OnStateChange;
+
+            Job j = new Job(Job.JobType.Erase);
+            j.DataSend = new byte[1];
+            j.DataSend[0] = 0xFF;
+
+
+            Job[] js = { j };
+            JE.SetJob(js);
+
+            while (true)
+            {
+                JE.BackgroundRun(false);
+                Thread.Sleep(100);
+            }
         }
 
         private static void WRITE_READTest()
@@ -104,6 +130,34 @@ namespace STM32CANFlasher
             IntelHexLoader loader = new IntelHexLoader();
             AddressDataGroup<byte> dataGroup = new AddressDataGroup<byte>();
             IntelHexLoader.ResultEnum r = loader.Load("a.hex", dataGroup);
+        }
+
+        private static void AllTest()
+        {
+            IntelHexLoader loader = new IntelHexLoader();
+            AddressDataGroup<byte> dataGroup = new AddressDataGroup<byte>();
+            IntelHexLoader.ResultEnum r = loader.Load("led.hex", dataGroup);
+
+            List<Job> jobs = new List<Job>();
+            JobMaker.EraseWrite(jobs, dataGroup, JobMaker.EraseOptEnum.All, null, true);
+
+            ICAN eCAN = new ECANDev();
+            eCAN.Open(0);
+            eCAN.Start(0, 125000, false, true, false);
+
+            JobExecutor JE = new JobExecutor(eCAN, 0);
+            JE.OnStateChange += JE_OnStateChange;
+
+            JE.SetJob(jobs.ToArray());
+
+            //Job[] js = { jobs[0], jobs[1], jobs[2] };
+            //JE.SetJob(js);
+
+            while (true)
+            {
+                JE.BackgroundRun(false);
+                Thread.Sleep(100);
+            }
         }
     }
 }
