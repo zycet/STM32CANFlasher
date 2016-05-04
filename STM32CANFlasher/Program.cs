@@ -86,9 +86,6 @@ namespace STM32CANFlasher
 
         static void Main(string[] args)
         {
-            stm32f4xx_1mb_fss();
-
-
             //Config Parse
             WriteLine("===== Config Parse =====");
             ConfigStruct config = new ConfigStruct();

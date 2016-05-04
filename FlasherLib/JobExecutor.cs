@@ -314,7 +314,7 @@ namespace BUAA.Flasher
                         RunningNext(JobEventType.NACK, "NACK");
                     }
 
-                    if (_StepRunning == 1)
+                    if (_StepRunning == 1 || _StepRunning == 3)
                     {
                         if (CheckCANMessage(CANMessage, ID_ERASE, DA_ACK))
                         {
@@ -326,12 +326,11 @@ namespace BUAA.Flasher
                             ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
                         }
                     }
-                    else if (_StepRunning == 2)
+                    else if (_StepRunning == 4)
                     {
                         if (CheckCANMessage(CANMessage, ID_ERASE, DA_ACK))
                         {
                             RunningNext();
-
                         }
                         else
                         {
@@ -438,7 +437,7 @@ namespace BUAA.Flasher
                     if (_StepRunning == 0)
                     {
                         RunningStrat();
-                        SendCANCmd(ID_ACK);
+                        SendCAN(ID_ACK);
                         _StepRunning++;
                     }
                     else
@@ -455,7 +454,7 @@ namespace BUAA.Flasher
                         byte[] data = new byte[5];
                         j.AddressTo(data, 0);
                         data[4] = (byte)(j.DataNum - 1);
-                        SendCANCmdData(ID_READ, data);
+                        SendCAN(ID_READ, data);
                         _StepRunning++;
                     }
                     else
@@ -473,7 +472,7 @@ namespace BUAA.Flasher
                         byte[] data = new byte[5];
                         j.AddressTo(data, 0);
                         data[4] = (byte)(j.DataSend.Length - 1);
-                        SendCANCmdData(ID_WRITE, data);
+                        SendCAN(ID_WRITE, data);
                         _StepRunning++;
                     }
                     else if (_StepRunning % 2 == 0 && _StepRunning <= 2 * m)
@@ -486,7 +485,7 @@ namespace BUAA.Flasher
                         byte[] data = new byte[len];
                         Array.Copy(j.DataSend, n * 8, data, 0, len);
 
-                        SendCANCmdData(ID_WRITEDATA, data);
+                        SendCAN(ID_WRITEDATA, data);
                         _StepRunning++;
                     }
                     else
@@ -500,7 +499,13 @@ namespace BUAA.Flasher
                     if (_StepRunning == 0)
                     {
                         RunningStrat();
-                        SendCANCmdData(ID_ERASE, j.DataSend);
+                        SendCAN(ID_ERASE, j.DataSend);
+                        _StepRunning++;
+                    }
+                    else if (_StepRunning == 2)
+                    {
+                        RunningStrat();
+                        SendCAN(ID_ERASE);
                         _StepRunning++;
                     }
                     else
@@ -514,7 +519,7 @@ namespace BUAA.Flasher
                     if (_StepRunning == 0)
                     {
                         RunningStrat();
-                        SendCANCmd(ID_GV);
+                        SendCAN(ID_GV);
                         _StepRunning++;
                     }
                     else
@@ -531,7 +536,7 @@ namespace BUAA.Flasher
 
                         byte[] data = new byte[4];
                         j.AddressTo(data, 0);
-                        SendCANCmdData(ID_GO, data);
+                        SendCAN(ID_GO, data);
 
                         _StepRunning++;
                     }
@@ -569,7 +574,7 @@ namespace BUAA.Flasher
 
         public bool IsShowSendRecive = true;
 
-        void SendCANCmdData(uint ID, byte[] Data)
+        void SendCAN(uint ID, byte[] Data)
         {
             CANMessage message = new CANMessage(ID, false, Data);
             CANMessage[] messages = { message };
@@ -581,14 +586,14 @@ namespace BUAA.Flasher
             }
         }
 
-        void SendCANCmd(uint ID)
+        void SendCAN(uint ID)
         {
-            SendCANCmdData(ID, null);
+            SendCAN(ID, null);
         }
 
-        public void SendCANCmdACK()
+        public void SendCANACK()
         {
-            SendCANCmd(ID_ACK);
+            SendCAN(ID_ACK);
         }
 
         #endregion
