@@ -10,15 +10,18 @@ namespace BUAA.Flasher
 
         public bool ShowReceiveSend = false;
 
+        public string CANDevFile = "ECANDev.dll";
+        public string CANDevClass = "BUAA.Device.ECANDev";
+
+        public int Timeout = 2;
+        public int TimeoutErase = 20;
+
+        public bool JumpToFlash = false;
+
         public int CANDeviceNo = 0;
         public uint CANPortNo = 0;
         public int CANBPS = 125000;
         public bool CANSendOnce = false;
-
-        public bool JumpToFlash = false;
-
-        public string CANDevFile = "ECANDev.dll";
-        public string CANDevClass = "BUAA.Device.ECANDev";
 
         public static int Parse(ConfigStruct Config, string[] args, ref string Msg)
         {
@@ -63,12 +66,57 @@ namespace BUAA.Flasher
                         else
                             Config.ShowReceiveSend = false;
                     }
+                    else if (ss[0].StartsWith("-candevfile"))
+                    {
+                        Config.CANDevFile = ss[1];
+                    }
+                    else if (ss[0].StartsWith("-candevclass"))
+                    {
+                        Config.CANDevClass = ss[1];
+                    }
+                    else if (ss[0].StartsWith("-timeout"))
+                    {
+                        Config.Timeout = int.Parse(ss[1]);
+                    }
+                    else if (ss[0].StartsWith("-timeouterase"))
+                    {
+                        Config.TimeoutErase = int.Parse(ss[1]);
+                    }
+                    else if (ss[0].StartsWith("-jumptoflash"))
+                    {
+                        if (ss[1].ToLower() == "y" || ss[1] == "yes")
+                            Config.JumpToFlash = true;
+                        else
+                            Config.JumpToFlash = false;
+                    }
+
+                    else if (ss[0].StartsWith("-candeviceno"))
+                    {
+                        Config.CANDeviceNo = int.Parse(ss[1]);
+                    }
+                    else if (ss[0].StartsWith("-canportno"))
+                    {
+                        Config.CANPortNo = uint.Parse(ss[1]);
+                    }
+                    else if (ss[0].StartsWith("-canbps"))
+                    {
+                        Config.CANBPS = int.Parse(ss[1]);
+                    }
+                    else if (ss[0].StartsWith("-cansendonce"))
+                    {
+                        if (ss[1].ToLower() == "y" || ss[1] == "yes")
+                            Config.CANSendOnce = true;
+                        else
+                            Config.CANSendOnce = false;
+                    }
+
                     else
                     {
                         r--;
                         Msg = ("Arg unable Accept:" + args[i]);
                         return -1;
                     }
+
 
                 }
                 catch (Exception ee)

@@ -63,10 +63,32 @@ namespace STM32CANFlasher
             Console.WriteLine(Job.Type + "@" + Msg);
         }
 
+        private static void MakeFlashSection(string File, int BaseAddress, byte[] Sizes)
+        {
+            int n = Sizes.Length;
+            JobMaker.FlashSectionStruct[] fss = new JobMaker.FlashSectionStruct[n];
+            for (int i = 0; i < n; i++)
+            {
+                fss[i] = new JobMaker.FlashSectionStruct(BaseAddress, Sizes[i] * 1024);
+                BaseAddress += Sizes[i] * 1024;
+            }
+            SerializerHelper.SerializerIn(fss, File);
+            SerializerHelper.SerializerIn(fss, "stm32f4xx_1mb.xml");
+        }
+
+        private static void stm32f4xx_1mb_fss()
+        {
+            byte[] sizeFlash = { 16, 16, 16, 16, 64, 128, 128, 128, 128, 128, 128, 128 };
+            MakeFlashSection("stm32f4xx_1mb.xml", 0x08000000, sizeFlash);
+        }
+
         #endregion
 
         static void Main(string[] args)
         {
+            stm32f4xx_1mb_fss();
+
+
             //Config Parse
             WriteLine("===== Config Parse =====");
             ConfigStruct config = new ConfigStruct();
@@ -130,6 +152,12 @@ namespace STM32CANFlasher
             {
                 WriteLine("===== Job Make =====");
                 JobMaker.EraseWrite(jobs, dataGroup, config.EraseOpt, FlashSection, true);
+
+                if (config.JumpToFlash)
+                {
+                    JobMaker.Go(jobs, dataGroup.Groups[0].Address);
+                }
+
                 WriteLine("Job Num:" + jobs.Count);
             }
             catch (Exception ee)
@@ -171,6 +199,8 @@ namespace STM32CANFlasher
             WriteLine("===== JobExecutor Init =====");
             JobExecutor JE = new JobExecutor(CANDev, config.CANPortNo);
             JE.IsShowSendRecive = config.ShowReceiveSend;
+            JE.TimeoutSpan = new TimeSpan(0, 0, config.Timeout);
+            JE.TimeoutSpanErase = new TimeSpan(0, 0, config.TimeoutErase);
             JE.OnStateChange += JE_OnStateChange;
             JE.SetJob(jobs.ToArray());
 
@@ -181,7 +211,7 @@ namespace STM32CANFlasher
                 JE.BackgroundRun(false);
                 Thread.Sleep(100);
             }
-            WriteLine("===== JobExecutor Over =====");
+            WriteLine("End With:" + JE.JobsState);
         }
     }
 }

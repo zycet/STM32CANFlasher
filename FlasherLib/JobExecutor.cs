@@ -95,6 +95,21 @@ namespace BUAA.Flasher
             }
         }
 
+        public Job.JobState JobsState
+        {
+            get
+            {
+                if (Jobs == null)
+                    return Job.JobState.Idle;
+                for (int i = 0; i < Jobs.Length; i++)
+                {
+                    if (Jobs[i].State != Job.JobState.Done)
+                        return Jobs[i].State;
+                }
+                return Job.JobState.Done;
+            }
+        }
+
         #endregion
 
         #region Event
@@ -193,7 +208,11 @@ namespace BUAA.Flasher
                 {
                     if (_StepRunning == 1)
                     {
-                        if (CheckCANMessage(CANMessage, ID_ACK, DA_NACK))
+                        if (CheckCANMessage(CANMessage, ID_ACK, DA_ACK))
+                        {
+                            RunningNext();
+                        }
+                        else if (CheckCANMessage(CANMessage, ID_ACK, DA_NACK))
                         {
                             RunningNext();
                         }
@@ -206,6 +225,11 @@ namespace BUAA.Flasher
                 //READ
                 else if (j.Type == Job.JobType.Read)
                 {
+                    if (CheckCANMessage(CANMessage, ID_READ, DA_NACK))
+                    {
+                        RunningNext(JobEventType.NACK, "NACK");
+                    }
+
                     int m = (int)Math.Ceiling(j.DataNum / 8f);
                     if (_StepRunning == 1)//ACK
                     {
@@ -253,6 +277,11 @@ namespace BUAA.Flasher
                 //WRITE
                 else if (j.Type == Job.JobType.Write)
                 {
+                    if (CheckCANMessage(CANMessage, ID_WRITE, DA_NACK))
+                    {
+                        RunningNext(JobEventType.NACK, "NACK");
+                    }
+
                     int m = (int)Math.Ceiling(j.DataSend.Length / 8f);
                     if (_StepRunning == 2 * m + 2)
                     {
@@ -277,9 +306,14 @@ namespace BUAA.Flasher
                         }
                     }
                 }
-                //Erase
+                //ERASE
                 else if (j.Type == Job.JobType.Erase)
                 {
+                    if (CheckCANMessage(CANMessage, ID_ERASE, DA_NACK))
+                    {
+                        RunningNext(JobEventType.NACK, "NACK");
+                    }
+
                     if (_StepRunning == 1)
                     {
                         if (CheckCANMessage(CANMessage, ID_ERASE, DA_ACK))
@@ -308,6 +342,11 @@ namespace BUAA.Flasher
                 //GV
                 else if (j.Type == Job.JobType.GetState)
                 {
+                    if (CheckCANMessage(CANMessage, ID_GV, DA_NACK))
+                    {
+                        RunningNext(JobEventType.NACK, "NACK");
+                    }
+
                     if (_StepRunning == 1)
                     {
                         if (CheckCANMessage(CANMessage, ID_GV, DA_ACK))
@@ -349,6 +388,26 @@ namespace BUAA.Flasher
                     else if (_StepRunning == 4)
                     {
                         if (CheckCANMessage(CANMessage, ID_GV, DA_ACK))
+                        {
+                            RunningNext();
+                        }
+                        else
+                        {
+                            ErrorWriteLine("Unknow Message:" + CANMessage.ToString());
+                        }
+                    }
+                }
+                //GO
+                else if (j.Type == Job.JobType.Go)
+                {
+                    if (CheckCANMessage(CANMessage, ID_GO, DA_NACK))
+                    {
+                        RunningNext(JobEventType.NACK, "NACK");
+                    }
+
+                    if (_StepRunning == 1)
+                    {
+                        if (CheckCANMessage(CANMessage, ID_GO, DA_ACK))
                         {
                             RunningNext();
                         }
@@ -463,6 +522,24 @@ namespace BUAA.Flasher
                         TimeoutCheck();
                     }
                 }
+                //GO
+                else if (j.Type == Job.JobType.Go)
+                {
+                    if (_StepRunning == 0)
+                    {
+                        RunningStrat();
+
+                        byte[] data = new byte[4];
+                        j.AddressTo(data, 0);
+                        SendCANCmdData(ID_GO, data);
+
+                        _StepRunning++;
+                    }
+                    else
+                    {
+                        TimeoutCheck();
+                    }
+                }
                 else
                 {
                     ErrorWriteLine("Unsupport Job:" + j.Type.ToString());
@@ -481,6 +558,7 @@ namespace BUAA.Flasher
         public const uint ID_WRITE = 0x031;
         public const uint ID_WRITEDATA = 0x04;
         public const uint ID_ERASE = 0x43;
+        public const uint ID_GO = 0x21;
 
         public const byte DA_ACK = 0x79;
         public const byte DA_NACK = 0x1F;

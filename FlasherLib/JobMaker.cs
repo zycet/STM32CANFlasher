@@ -164,5 +164,13 @@ namespace BUAA.Flasher
             Jobs.Add(j);
             return 1;
         }
+
+        public static int Go(List<Job> Jobs, int Address)
+        {
+            Job j = new Job(Job.JobType.Go);
+            j.Address = Address;
+            Jobs.Add(j);
+            return 1;
+        }
     }
 }
