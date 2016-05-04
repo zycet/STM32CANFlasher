@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("STM32CANFlasher")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A Console Program for Flash the STM32 ARM Chip using CAN-Bus by C#")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("BUAA")]
 [assembly: AssemblyProduct("STM32CANFlasher")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2016")]
+[assembly: AssemblyCopyright("Copyright © BUAA 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

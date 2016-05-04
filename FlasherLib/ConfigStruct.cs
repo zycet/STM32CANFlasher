@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BUAA;
-using System.Reflection;
 
 namespace BUAA.Flasher
 {
@@ -21,6 +16,9 @@ namespace BUAA.Flasher
         public bool CANSendOnce = false;
 
         public bool JumpToFlash = false;
+
+        public string CANDevFile = "ECANDev.dll";
+        public string CANDevClass = "BUAA.Device.ECANDev";
 
         public static int Parse(ConfigStruct Config, string[] args, ref string Msg)
         {

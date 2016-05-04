@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BUAA.Structure;
 using System.IO;
+using BUAA.Structure;
 
 namespace BUAA.Misc
 {

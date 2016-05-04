@@ -1,15 +1,12 @@
-﻿using BUAA;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
 using BUAA.Device;
 using BUAA.Flasher;
 using BUAA.Hibernate;
 using BUAA.Misc;
 using BUAA.Structure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 
 namespace STM32CANFlasher
 {
@@ -71,6 +68,7 @@ namespace STM32CANFlasher
         static void Main(string[] args)
         {
             //Config Parse
+            WriteLine("===== Config Parse =====");
             ConfigStruct config = new ConfigStruct();
             string rString = "";
             int numArgAccept = ConfigStruct.Parse(config, args, ref rString); ;
@@ -80,20 +78,28 @@ namespace STM32CANFlasher
                 ErrorWriteLine(rString);
                 return;
             }
+
             WriteLine("Args Parsed Num:" + numArgAccept);
             ArgsShow(config);
 
             //Hex Load
+            WriteLine("===== Hex Load =====");
             AddressDataGroup<byte> dataGroup = new AddressDataGroup<byte>();
             try
             {
                 IntelHexLoader hexLoader = new IntelHexLoader();
                 IntelHexLoader.ResultEnum r = hexLoader.Load(config.HexFile, dataGroup);
+                if (dataGroup.Groups.Count != 1)
+                {
+                    ErrorWriteLine("Hex Not Have One Data Section.");
+                    return;
+                }
                 if (r != IntelHexLoader.ResultEnum.Success)
                 {
                     ErrorWriteLine(r.ToString());
                     return;
                 }
+                WriteLine("Hex Data Size:" + dataGroup.Groups[0].Datas.Count);
             }
             catch (Exception ee)
             {
@@ -107,7 +113,9 @@ namespace STM32CANFlasher
             {
                 try
                 {
+                    WriteLine("===== FlashSection Load =====");
                     FlashSection = (JobMaker.FlashSectionStruct[])SerializerHelper.Deserialize(config.FlashSectionFile, typeof(JobMaker.FlashSectionStruct[]));
+                    WriteLine("FlashSection Num:" + FlashSection.Length);
                 }
                 catch (Exception ee)
                 {
@@ -116,11 +124,13 @@ namespace STM32CANFlasher
                 }
             }
 
-            //Make Job
+            //Job Make
             List<Job> jobs = new List<Job>();
             try
             {
+                WriteLine("===== Job Make =====");
                 JobMaker.EraseWrite(jobs, dataGroup, config.EraseOpt, FlashSection, true);
+                WriteLine("Job Num:" + jobs.Count);
             }
             catch (Exception ee)
             {
@@ -129,22 +139,27 @@ namespace STM32CANFlasher
             }
 
             //CAN Open
-            ICAN eCAN = null;
+            ICAN CANDev = null;
             try
             {
-                eCAN = new ECANDev();
-                bool rOpen = eCAN.Open(config.CANDeviceNo);
+                WriteLine("===== CAN Open =====");
+                string dllPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, config.CANDevFile);
+                Assembly ass = Assembly.LoadFile(dllPath);
+                Type tCAN = ass.GetType(config.CANDevClass);
+                CANDev = (ICAN)Activator.CreateInstance(tCAN);
+                bool rOpen = CANDev.Open(config.CANDeviceNo);
                 if (!rOpen)
                 {
                     ErrorWriteLine("CAN Open Fail.");
                     return;
                 }
-                bool rStart = eCAN.Start(config.CANPortNo, config.CANBPS, false, config.CANSendOnce, false);
+                bool rStart = CANDev.Start(config.CANPortNo, config.CANBPS, false, config.CANSendOnce, false);
                 if (!rOpen)
                 {
                     ErrorWriteLine("CAN Start Fail.");
                     return;
                 }
+                WriteLine("CAN Open Success");
             }
             catch (Exception ee)
             {
@@ -153,164 +168,20 @@ namespace STM32CANFlasher
             }
 
             //JobExecutor Init
-            JobExecutor JE = new JobExecutor(eCAN, config.CANPortNo);
+            WriteLine("===== JobExecutor Init =====");
+            JobExecutor JE = new JobExecutor(CANDev, config.CANPortNo);
             JE.IsShowSendRecive = config.ShowReceiveSend;
             JE.OnStateChange += JE_OnStateChange;
             JE.SetJob(jobs.ToArray());
 
             //Run
+            WriteLine("===== JobExecutor Running =====");
             while (JE.IsRunning)
             {
                 JE.BackgroundRun(false);
                 Thread.Sleep(100);
             }
+            WriteLine("===== JobExecutor Over =====");
         }
-        
-        #region Test
-
-        static void Test()
-        {
-            //HexTest();
-            //ACKTest();
-            //READTest();
-            //WRITE_READTest();
-            //ERASETest();
-            //AllTest();
-        }
-
-        private static void ERASETest()
-        {
-            ICAN eCAN = new ECANDev();
-            eCAN.Open(0);
-            eCAN.Start(0, 125000, false, true, false);
-
-            JobExecutor JE = new JobExecutor(eCAN, 0);
-            JE.OnStateChange += JE_OnStateChange;
-
-            Job j = new Job(Job.JobType.Erase);
-            j.DataSend = new byte[1];
-            j.DataSend[0] = 0xFF;
-
-
-            Job[] js = { j };
-            JE.SetJob(js);
-
-            while (true)
-            {
-                JE.BackgroundRun(false);
-                Thread.Sleep(10);
-            }
-        }
-
-        private static void WRITE_READTest()
-        {
-            ICAN eCAN = new ECANDev();
-            eCAN.Open(0);
-            eCAN.Start(0, 125000, false, true, false);
-
-            JobExecutor JE = new JobExecutor(eCAN, 0);
-            JE.OnStateChange += JE_OnStateChange;
-
-            Job jWrite = new Job(Job.JobType.Write);
-            jWrite.Address = 0x20000000 + 32 * 1024;
-            jWrite.DataNum = 16;
-            jWrite.DataSend = new byte[jWrite.DataNum];
-            for (int i = 0; i < jWrite.DataNum; i++)
-                jWrite.DataSend[i] = (byte)i;
-
-            Job jRead = new Job(Job.JobType.Read);
-            jRead.Address = 0x20000000 + 32 * 1024;
-            jRead.DataNum = 16;
-
-            Job[] js = { jWrite, jRead };
-            JE.SetJob(js);
-
-            while (true)
-            {
-                JE.BackgroundRun(false);
-                Thread.Sleep(100);
-            }
-        }
-
-        private static void READTest()
-        {
-            ICAN eCAN = new ECANDev();
-            eCAN.Open(0);
-            eCAN.Start(0, 125000, false, true, false);
-
-            JobExecutor JE = new JobExecutor(eCAN, 0);
-            JE.OnStateChange += JE_OnStateChange;
-
-            Job j = new Job(Job.JobType.Read);
-            j.Address = 0x8000000;
-            j.DataNum = 16;
-            Job[] js = { j };
-            JE.SetJob(js);
-
-            while (true)
-            {
-                JE.BackgroundRun(false);
-                Thread.Sleep(100);
-            }
-        }
-
-        private static void ACKTest()
-        {
-            ICAN eCAN = new ECANDev();
-            eCAN.Open(0);
-            eCAN.Start(0, 125000, false, true, false);
-
-            JobExecutor JE = new JobExecutor(eCAN, 0);
-            JE.OnStateChange += JE_OnStateChange;
-
-            Job[] js = new Job[3];
-            js[0] = new Job(Job.JobType.ACK);
-            js[1] = new Job(Job.JobType.GetState);
-            js[2] = new Job(Job.JobType.ACK);
-            JE.SetJob(js);
-
-            while (true)
-            {
-                JE.BackgroundRun(false);
-                Thread.Sleep(100);
-            }
-        }
-
-        private static void HexTest()
-        {
-            IntelHexLoader loader = new IntelHexLoader();
-            AddressDataGroup<byte> dataGroup = new AddressDataGroup<byte>();
-            IntelHexLoader.ResultEnum r = loader.Load("a.hex", dataGroup);
-        }
-
-        private static void AllTest()
-        {
-            IntelHexLoader loader = new IntelHexLoader();
-            AddressDataGroup<byte> dataGroup = new AddressDataGroup<byte>();
-            IntelHexLoader.ResultEnum r = loader.Load("led.hex", dataGroup);
-
-            List<Job> jobs = new List<Job>();
-            JobMaker.EraseWrite(jobs, dataGroup, JobMaker.EraseOptEnum.All, null, true);
-
-            ICAN eCAN = new ECANDev();
-            eCAN.Open(0);
-            eCAN.Start(0, 125000, false, true, false);
-
-            JobExecutor JE = new JobExecutor(eCAN, 0);
-            JE.OnStateChange += JE_OnStateChange;
-
-            JE.SetJob(jobs.ToArray());
-
-            //Job[] js = { jobs[0], jobs[1], jobs[2] };
-            //JE.SetJob(js);
-
-            while (true)
-            {
-                JE.BackgroundRun(false);
-                Thread.Sleep(100);
-            }
-        }
-
-        #endregion
     }
 }
