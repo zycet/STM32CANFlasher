@@ -14,7 +14,7 @@ namespace BUAA.Flasher
         public string CANDevClass = "BUAA.Device.ECANDev";
 
         public int Timeout = 2;
-        public int TimeoutErase = 20;
+        public int TimeoutErase = 30;
 
         public bool JumpToFlash = false;
 

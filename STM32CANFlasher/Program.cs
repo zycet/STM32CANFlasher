@@ -209,6 +209,7 @@ namespace STM32CANFlasher
                 Thread.Sleep(100);
             }
             WriteLine("End With:" + JE.JobsState);
+            Console.ReadLine();
         }
     }
 }

@@ -22,7 +22,7 @@ V1.0 2016-5-4
 * STM32F40_41xxx-LED_Demo.hex(此程序会让开发板上PD12 PD13引脚连接的LED3 LED4闪烁)
 * 连接CAN2接口(PB5 PB13)至CAN收发器并与USB-CAN模块连接.
 * 将BOOT0引脚拉高
-* 执行STM32CANFlasher.exe -HexFile="STM32F40_41xxx-LED_Demo.hex" -EraseOpt=All -ShowReceiveSend=no -FlashSectionFile=""
+* 执行STM32CANFlasher.exe -HexFile="STM32F40_41xxx-LED_Demo.hex" -EraseOpt=OnlyUsed -FlashSectionFile="stm32f4xx_1mb.xml"
 
 命令行参数
 * -HexFile="待烧写的hex格式文件,必须设定"
